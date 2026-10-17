@@ -1,0 +1,76 @@
+name: pulse
+services:
+  pulse:
+    image: ghcr.io/raiden0456/pulse:latest
+    container_name: pulse
+    network_mode: bridge
+    restart: unless-stopped
+    ports:
+      - target: 8080
+        published: "8485"
+        protocol: tcp
+    environment:
+      APP_PASSWORD: change-me
+      TZ: Europe/Madrid
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/google.json
+      PULSE_SHEET_ID: ""
+      PULSE_SHEET_TAB: events
+      PULSE_SHEET_POLL: 5m
+      PULSE_APPS: ""
+    volumes:
+      - type: bind
+        source: /DATA/AppData/pulse/data
+        target: /data
+      - type: bind
+        source: /DATA/AppData/pulse/google.json
+        target: /secrets/google.json
+        read_only: true
+    x-casaos:
+      envs:
+        - container: APP_PASSWORD
+          description:
+            en_US: Password for signing in
+        - container: TZ
+          description:
+            en_US: Time zone for greetings and dates
+        - container: PULSE_SHEET_ID
+          description:
+            en_US: ID of the Pulse Inbox Google Sheet (from its URL)
+        - container: PULSE_SHEET_TAB
+          description:
+            en_US: Sheet tab the agents append rows to
+        - container: PULSE_SHEET_POLL
+          description:
+            en_US: How often to pull rows from the sheet (min 1m)
+        - container: PULSE_APPS
+          description:
+            en_US: "Apps to link and health-check: Name=http://host:port;Other=http://host:port"
+      ports:
+        - container: "8080"
+          description:
+            en_US: WebUI HTTP port
+      volumes:
+        - container: /data
+          description:
+            en_US: Database and wallpaper
+        - container: /secrets/google.json
+          description:
+            en_US: Google service account key with Editor access to the sheet
+x-casaos:
+  main: pulse
+  architectures:
+    - amd64
+    - arm64
+  author: Raiden0456
+  developer: Raiden0456
+  category: Utilities
+  icon: https://cdn.jsdelivr.net/gh/Raiden0456/Pulse@master/web/public/logo.svg
+  title:
+    en_US: Pulse
+  tagline:
+    en_US: Personal home dashboard for AI agents and apps
+  description:
+    en_US: What your scheduled AI agents did, what needs attention, and links to your self-hosted apps on one screen.
+  port_map: "8485"
+  scheme: http
+  index: /

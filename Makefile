@@ -1,4 +1,4 @@
-.PHONY: dev-api dev-web web build test generate docker
+.PHONY: dev-api dev-web web build test generate
 
 dev-api:
 	set -a; [ -f .env ] && . ./.env; set +a; \
@@ -19,6 +19,3 @@ test:
 
 generate:
 	go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1 generate
-
-docker:
-	docker compose up -d --build

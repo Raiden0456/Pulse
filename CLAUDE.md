@@ -13,13 +13,13 @@ Self-hosted, single-user home dashboard: what my AI agents did, what needs atten
 
 ## Stack
 
-Same skeleton as gonteractive: Go stdlib `net/http`, SQLite (`modernc.org/sqlite`), `sqlc`, goose migrations on startup; React 19 + Vite + TS + Tailwind v4 + shadcn (radix-nova) + TanStack Query, SPA embedded via `web/embed.go`. Deploy = `compose.yaml` with a Tailscale sidecar, tailnet-only (no Funnel).
+Same skeleton as gonteractive: Go stdlib `net/http`, SQLite (`modernc.org/sqlite`), `sqlc`, goose migrations on startup; React 19 + Vite + TS + Tailwind v4 + shadcn (radix-nova) + TanStack Query, SPA embedded via `web/embed.go`. Deploy: GitHub Actions (`.github/workflows/docker.yml`, on push to `master`) builds `ghcr.io/raiden0456/pulse` for amd64/arm64; the home server runs it via `deploy/casaos/docker-compose.yml` on port 8485. Tailscale runs on the host, nothing is exposed publicly.
 
 ## Commands
 
 - `make dev-api` (API on :8080, password `dev`) + `make dev-web` (Vite on :5173, proxies `/api`).
 - `make test` — `go test -race ./...`, oxlint, `tsc -b`.
-- `make build`, `make generate` (after editing `internal/store/queries` or migrations), `make docker` (needs `.env` and `secrets/google.json`).
+- `make build`, `make generate` (after editing `internal/store/queries` or migrations).
 
 ## Conventions
 
