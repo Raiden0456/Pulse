@@ -48,20 +48,12 @@ export function TodayPage() {
           </div>
         </header>
 
-        <section
-          data-glass
-          {...enter(1)}
-          className="enter relative overflow-hidden rounded-2xl border bg-gradient-to-br from-hue-blue/20 via-hue-purple/12 to-hue-cyan/15 p-6"
-        >
-          <div className="pointer-events-none absolute -top-16 -right-10 size-48 rounded-full bg-hue-purple/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 left-1/3 size-48 rounded-full bg-hue-blue/20 blur-3xl" />
-          <div className="relative flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground">
-              {now.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}
-            </span>
-            <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{t(greetingKey(now.getHours()))}, Raiden</h1>
-            <p className="text-sm text-muted-foreground">{t("today.subtitle")}</p>
-          </div>
+        <section {...enter(1)} className="enter text-legible flex flex-col gap-1">
+          <span className="text-xs uppercase tracking-wider text-muted-foreground">
+            {now.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}
+          </span>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{t(greetingKey(now.getHours()))}, Raiden</h1>
+          <p className="text-sm text-muted-foreground">{t("today.subtitle")}</p>
         </section>
 
         {(events.error || latest.error) && <ErrorAlert error={events.error ?? latest.error} />}
