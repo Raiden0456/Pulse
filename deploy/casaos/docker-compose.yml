@@ -10,7 +10,7 @@ services:
         published: "8485"
         protocol: tcp
     environment:
-      APP_PASSWORD: change-me
+      APP_PASSWORD: ""
       TZ: Europe/Madrid
       GOOGLE_APPLICATION_CREDENTIALS: /secrets/google.json
       PULSE_SHEET_ID: ""
