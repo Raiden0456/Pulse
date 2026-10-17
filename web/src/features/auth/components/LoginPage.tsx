@@ -1,0 +1,51 @@
+import { useState, type FormEvent } from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "react-router"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { errorMessage } from "@/lib/api"
+import { authApi } from "../api"
+
+export function LoginPage() {
+  const [password, setPassword] = useState("")
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const login = useMutation({
+    mutationFn: authApi.login,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["me"] })
+      navigate("/", { replace: true })
+    },
+  })
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault()
+    login.mutate(password)
+  }
+
+  return (
+    <div className="flex min-h-svh items-center justify-center bg-gradient-to-br from-hue-blue/10 via-background to-hue-purple/10 p-4">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="items-center text-center">
+          <img src="/logo.svg" alt="" className="mx-auto mb-2 size-12" />
+          <CardTitle className="text-xl">Pulse</CardTitle>
+          <CardDescription>Всё, что произошло, на одном экране</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={submit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="password">Пароль</Label>
+              <Input id="password" type="password" autoFocus autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            {login.error && <p className="text-sm text-destructive">{errorMessage(login.error)}</p>}
+            <Button type="submit" disabled={!password || login.isPending}>
+              {login.isPending ? "Входим…" : "Войти"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
