@@ -1,17 +1,17 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { ActivityIcon, AppWindowIcon, BellRingIcon, LogOutIcon } from "lucide-react"
+import { LogOutIcon } from "lucide-react"
 import { ErrorAlert } from "@/components/ErrorAlert"
 import { PageLoader } from "@/components/PageLoader"
 import { Button } from "@/components/ui/button"
 import { AppsCard, appsApi } from "@/features/apps"
 import { authApi } from "@/features/auth"
-import { ActivityCard, AttentionCard, TasksCard, attentionItems, eventsApi, isStale } from "@/features/events"
+import { ActivityCard, AttentionCard, TasksCard, attentionItems, eventsApi } from "@/features/events"
 import { LanguageToggle, useInterface, useInterfaceSync } from "@/features/settings"
+import { InvoicesCard, JobSearchCard, MailCard } from "@/features/summary"
 import { WallpaperBackdrop, WallpaperMenu, useWallpaper } from "@/features/wallpaper"
 import { useI18n } from "@/i18n"
 import { enter } from "@/lib/enter"
 import { greetingKey } from "../utils/greeting"
-import { StatTile } from "./StatTile"
 
 const REFRESH_MS = 60_000
 
@@ -29,9 +29,6 @@ export function TodayPage() {
 
   const now = new Date()
   const attention = attentionItems(events.data ?? [])
-  const healthyTasks = (latest.data ?? []).filter((e) => e.status !== "error" && !isStale(e.task, e.run_at)).length
-  const appsUp = (apps.data ?? []).filter((a) => a.up).length
-  const critical = attention.filter((i) => i.severity === "critical").length
 
   return (
     <>
@@ -61,16 +58,10 @@ export function TodayPage() {
 
         {(events.error || latest.error) && <ErrorAlert error={events.error ?? latest.error} />}
 
-        <section className="grid grid-cols-3 gap-3">
-          <StatTile
-            {...enter(2)}
-            icon={BellRingIcon}
-            value={String(attention.length)}
-            label={critical ? t("today.statCritical", { count: critical }) : t("today.statAttention")}
-            tone={critical ? "text-destructive" : attention.length ? "text-warning" : "text-success"}
-          />
-          <StatTile {...enter(3)} icon={ActivityIcon} value={`${healthyTasks}/${latest.data?.length ?? 0}`} label={t("today.statAgents")} tone="text-hue-purple" />
-          <StatTile {...enter(4)} icon={AppWindowIcon} value={apps.data ? `${appsUp}/${apps.data.length}` : "—"} label={t("today.statApps")} tone="text-hue-blue" />
+        <section className="grid gap-3 sm:grid-cols-3">
+          <JobSearchCard {...enter(2)} />
+          <MailCard {...enter(3)} />
+          <InvoicesCard {...enter(4)} latest={latest.data?.find((e) => e.task === "invoices")} />
         </section>
 
         <div className="grid gap-6 lg:grid-cols-3">

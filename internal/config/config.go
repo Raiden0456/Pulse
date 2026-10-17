@@ -25,6 +25,8 @@ type Config struct {
 	SheetPoll      time.Duration
 	GoogleCredFile string
 	Apps           []App
+	JobSearchURL   string
+	JobSearchPass  string
 }
 
 func (c Config) DBPath() string {
@@ -39,6 +41,8 @@ func Load() (Config, error) {
 		SheetID:        os.Getenv("PULSE_SHEET_ID"),
 		SheetTab:       env("PULSE_SHEET_TAB", "events"),
 		GoogleCredFile: os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"),
+		JobSearchURL:   os.Getenv("JOBSEARCH_URL"),
+		JobSearchPass:  os.Getenv("JOBSEARCH_PASSWORD"),
 	}
 	if c.Password == "" {
 		return c, errors.New("APP_PASSWORD is required")

@@ -78,6 +78,9 @@ func NormalizePayload(raw string) string {
 }
 
 func (s *Service) list(w http.ResponseWriter, r *http.Request) error {
+	if task := r.URL.Query().Get("task"); task != "" {
+		return s.listTask(w, r, task)
+	}
 	limit := defaultLimit
 	if v := r.URL.Query().Get("limit"); v != "" {
 		n, err := strconv.Atoi(v)
@@ -87,6 +90,19 @@ func (s *Service) list(w http.ResponseWriter, r *http.Request) error {
 		limit = min(n, maxLimit)
 	}
 	rows, err := s.q.ListEvents(r.Context(), int64(limit))
+	if err != nil {
+		return err
+	}
+	httpx.JSON(w, http.StatusOK, toEvents(rows))
+	return nil
+}
+
+func (s *Service) listTask(w http.ResponseWriter, r *http.Request, task string) error {
+	since, err := strconv.ParseInt(r.URL.Query().Get("since"), 10, 64)
+	if err != nil {
+		return httpx.Errorf(http.StatusBadRequest, "since must be a unix timestamp")
+	}
+	rows, err := s.q.ListTaskEventsSince(r.Context(), db.ListTaskEventsSinceParams{Task: task, RunAt: since})
 	if err != nil {
 		return err
 	}

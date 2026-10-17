@@ -112,3 +112,44 @@ func (q *Queries) ListEvents(ctx context.Context, limit int64) ([]Event, error) 
 	}
 	return items, nil
 }
+
+const listTaskEventsSince = `-- name: ListTaskEventsSince :many
+SELECT id, source, task, status, summary, payload, run_at, created_at FROM events WHERE task = ? AND run_at >= ? ORDER BY run_at DESC
+`
+
+type ListTaskEventsSinceParams struct {
+	Task  string
+	RunAt int64
+}
+
+func (q *Queries) ListTaskEventsSince(ctx context.Context, arg ListTaskEventsSinceParams) ([]Event, error) {
+	rows, err := q.db.QueryContext(ctx, listTaskEventsSince, arg.Task, arg.RunAt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Event
+	for rows.Next() {
+		var i Event
+		if err := rows.Scan(
+			&i.ID,
+			&i.Source,
+			&i.Task,
+			&i.Status,
+			&i.Summary,
+			&i.Payload,
+			&i.RunAt,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

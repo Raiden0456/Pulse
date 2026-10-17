@@ -31,7 +31,10 @@ It is built for exactly my setup: the greeting has my name in it, and it knows t
 
 ## What it shows
 
-- **Today**: the greeting and three counters: how many items need attention, how many agents are healthy, and how many apps are online.
+- **Today**: the greeting and three summary cards, each with one headline and one tiny chart:
+  - **Job search**: a funnel bar from drafts to offers and the shortlist size, headlined by whatever needs action first: applications quiet for 10+ days, then unsent drafts. Pulled live from ai-job-search.
+  - **Mail**: critical and warning emails per day over the last week.
+  - **Invoices**: paid versus to-pay this month and the next due date.
 - **Needs attention**: critical and warning emails from the mail scan, overdue or unpaid invoices and invoice issues, plus any agent run that failed, all from the last three days. The most severe items come first, each with a link straight to the email.
 - **Agents**: the last run of every task. A task turns yellow when it has been quiet longer than its schedule allows (four days for the weekday briefs, so weekends do not count, and eight for the weekly review) and red when its last run failed.
 - **Activity**: a timeline of every report. Claude briefs show their headline and key points, with a link to the full HTML artifact.
@@ -76,7 +79,7 @@ The payload shapes Pulse understands:
 | Task | Payload |
 | --- | --- |
 | `mail-scan` | `{"scanned": 5, "items": [{"severity": "critical\|warning", "from", "subject", "received_at", "reason", "action", "deadline", "link"}]}` |
-| `invoices` | `{"invoices": [{"counterparty", "number", "amount", "currency", "issued_at", "due_at", "state": "new\|paid\|unpaid\|overdue", "note"}], "totals": {}, "issues": []}` |
+| `invoices` | `{"invoices": [{"counterparty", "number", "amount", "currency", "issued_at", "due_at", "state": "new\|paid\|unpaid\|overdue", "note"}], "totals": {"EUR": {"paid", "unpaid", "overdue"}}, "issues": []}`, where `totals` covers the whole current month, not only new invoices |
 | `morning-brief`, `pre-standup-brief`, `weekly-review` | `{"artifact_url", "headline", "highlights": []}` |
 
 Unknown tasks still appear in Activity and Agents with their summary. Payloads come from LLMs, so Pulse strips markdown code fences and treats invalid JSON as empty instead of failing.
@@ -138,6 +141,7 @@ Paste the contents of [`deploy/casaos/docker-compose.yml`](deploy/casaos/docker-
 | `TZ` | Your time zone, for example `Europe/Madrid`. |
 | `PULSE_SHEET_ID` | The spreadsheet ID from [Google setup](#google-setup). |
 | `PULSE_APPS` | The other apps by LAN address, for example `Gonteractive=http://192.168.1.10:8484;AI Job Search=http://192.168.1.10:3000`. |
+| `JOBSEARCH_URL`, `JOBSEARCH_PASSWORD` | ai-job-search's address and password, for the job search card. |
 
 Leave `GOOGLE_APPLICATION_CREDENTIALS`, `PULSE_SHEET_TAB` and `PULSE_SHEET_POLL` as they are, then press **Install**. The app's data lives in `/DATA/AppData/pulse/data`.
 
@@ -168,6 +172,8 @@ Run only **one** Pulse with `PULSE_SHEET_ID` set. Every instance deletes the row
 | `PULSE_SHEET_TAB` | `events` | Tab that agents append rows to. |
 | `PULSE_SHEET_POLL` | `5m` | How often to pull rows. The minimum is `1m`. |
 | `PULSE_APPS` | (empty) | Apps to link and health-check: `Name=http://host:port;Other=http://host:port`. Use addresses the container can reach, such as the server's LAN IP; `*.ts.net` names may not resolve inside Docker. |
+| `JOBSEARCH_URL` | (empty) | Base URL of ai-job-search for the summary card, for example `http://192.168.1.10:8095`. The card asks to be connected when empty. |
+| `JOBSEARCH_PASSWORD` | (empty) | ai-job-search's `APP_PASSWORD`. Pulse signs in like a browser and reuses the session cookie, so the fork needs no changes. |
 | `APP_ADDR` | `:8080` | HTTP listen address. |
 | `APP_DATA_DIR` | `data` (`/data` in Docker) | Location of the SQLite database and the wallpaper. |
 | `APP_COOKIE_SECURE` | `auto` | `auto` marks the session cookie `Secure` only for HTTPS requests; `true`/`false` force it. |
@@ -203,9 +209,11 @@ internal/
   events/             event storage and API
   apps/               app links and health checks
   wallpaper/          background image upload and serving
+  jobsearch/          ai-job-search client and summary
+  settings/           language and wallpaper dimming
   auth/ config/ httpx/ server/
   store/              SQLite, migrations, sqlc queries
 web/                  React app (embedded into the binary)
-  src/features/       today, events, apps, wallpaper, auth
+  src/features/       today, summary, events, apps, wallpaper, settings, auth
 deploy/casaos/        CasaOS / ZimaOS compose
 ```

@@ -17,6 +17,8 @@ services:
       PULSE_SHEET_TAB: events
       PULSE_SHEET_POLL: 5m
       PULSE_APPS: ""
+      JOBSEARCH_URL: ""
+      JOBSEARCH_PASSWORD: ""
     volumes:
       - type: bind
         source: /DATA/AppData/pulse/data
@@ -45,6 +47,12 @@ services:
         - container: PULSE_APPS
           description:
             en_US: "Apps to link and health-check: Name=http://host:port;Other=http://host:port"
+        - container: JOBSEARCH_URL
+          description:
+            en_US: "ai-job-search base URL for the summary card, e.g. http://192.168.1.10:8095"
+        - container: JOBSEARCH_PASSWORD
+          description:
+            en_US: ai-job-search APP_PASSWORD (empty if it has none)
       ports:
         - container: "8080"
           description:
