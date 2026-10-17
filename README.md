@@ -5,32 +5,59 @@
 <h1 align="center">Pulse</h1>
 
 <p align="center">
-  A self-hosted home dashboard for your AI agents and apps.<br>
-  What your scheduled ChatGPT and Claude tasks did, what needs your attention, and one-click links to your other services, on one screen.
+  My personal morning screen.<br>
+  Everything my AI agents did while I was busy, what actually needs me, and a door into the rest of my home server.
 </p>
 
 ---
 
-## Features
+## Why I built this
 
-- **Today screen**: a greeting for the time of day, plus counters for open items, healthy agents and apps that are online.
-- **Needs attention**: critical and warning emails from the mail scan, overdue or unpaid invoices, invoice issues and failed agent runs from the last three days, most severe first, with a direct link to the email.
-- **Agents**: the last run of every scheduled task. A task turns yellow when it has been quiet for longer than its schedule allows and red when its last run failed.
-- **Activity**: a timeline of every report. Claude briefs show their headline, key points and a link to the full HTML artifact.
-- **Apps**: links to your other self-hosted apps, each health-checked from the server with its latency.
-- **Wallpaper**: upload a background photo and the cards turn into frosted glass. The image is stored on the server, so every device sees the same one.
-- **Read-only by design**: Pulse never runs, stops or edits your agents. If it is down, your agents keep working and their reports wait in the sheet.
-- Light and dark themes that follow the system, a staggered first render, and a layout that works on phones.
+I run a bunch of AI automations, and they were scattered across too many places.
 
-## How agents report
+| Where | Task | When |
+| --- | --- | --- |
+| Claude (work) | Morning brief | weekdays 9:00 |
+| Claude (work) | Pre-standup brief | weekdays 14:40 |
+| Claude (work) | Weekly review | Fridays 16:00 |
+| ChatGPT (personal) | Scan my mail for critical and problematic emails | scheduled |
+| ChatGPT (personal) | Keep my invoices in order in Google Drive | scheduled |
 
-Scheduled tasks in ChatGPT and Claude run in the vendors' clouds. ChatGPT tasks cannot make HTTP requests, and a home server on a tailnet is not reachable from those clouds. So agents do not call Pulse. Each run instead appends **one row** to a Google Sheet through the Google connector both apps already have, and Pulse pulls from that sheet.
+On top of that I self-host two apps on my home server: [Gonteractive](https://github.com/Raiden0456/gonteractive), my Go tutor, and a fork of [ai-job-search](https://github.com/MadsLorentzen/ai-job-search) that runs my job hunt.
+
+Every morning I had to open the Claude app, the ChatGPT inbox, Gmail and two browser tabs to find out what had happened. I wanted one page that says "good morning, Raiden", shows what happened and what needs me right now, and lets me jump into the right app. That page is Pulse.
+
+It is built for exactly my setup: the greeting has my name in it, the UI is in Russian, and it knows the payloads of my own tasks. I am not trying to make it a product. If you want something similar, fork it and bend it to your own agents.
+
+## What it shows
+
+- **Today**: the greeting and three counters: how many items need attention, how many agents are healthy, and how many apps are online.
+- **Needs attention**: critical and warning emails from the mail scan, overdue or unpaid invoices and invoice issues, plus any agent run that failed, all from the last three days. The most severe items come first, each with a link straight to the email.
+- **Agents**: the last run of every task. A task turns yellow when it has been quiet longer than its schedule allows (four days for the weekday briefs, so weekends do not count, and eight for the weekly review) and red when its last run failed.
+- **Activity**: a timeline of every report. Claude briefs show their headline and key points, with a link to the full HTML artifact.
+- **Apps**: Gonteractive and ai-job-search, health-checked from the server with their latency.
+- **Wallpaper**: I can put a photo behind everything, and the cards turn into frosted glass.
+
+## Decisions
+
+**Read-only, not an orchestrator.** My first idea was a control center that runs Claude and Codex as workers. I dropped it. The scheduled tasks already run reliably in the vendors' clouds, including when my server is down, and I did not want to rebuild that. Pulse only observes. If it is down, nothing breaks, and the reports wait.
+
+**A Google Sheet as the inbox.** Agents cannot simply call Pulse:
+
+- ChatGPT scheduled tasks have no way to make an HTTP request. They can only use connectors.
+- My server lives on a Tailscale network, so it is not reachable from Anthropic's or OpenAI's clouds, and I do not want to expose it to the internet.
+
+Both apps can write to Google Sheets through their connectors, though. So each run appends one row to a sheet called `Pulse Inbox`, and Pulse pulls from it.
 
 ```
 ChatGPT / Claude task ──append row──▶ Google Sheet "Pulse Inbox" ◀──poll + delete── Pulse ──▶ SQLite
 ```
 
-Every `PULSE_SHEET_POLL`, Pulse reads all data rows, stores them (deduplicated on source, task and run time), and then deletes those rows from the sheet. The sheet stays almost empty, so it uses no meaningful Drive storage. Rows appended during a sync sit below the deleted range and are picked up on the next poll.
+My Drive storage is tight and reserved for my invoices, so Pulse deletes every row once it has stored it, and the sheet stays empty. Rows are deduplicated on source, task and run time, and rows appended during a sync are picked up on the next poll.
+
+**Links to artifacts, not the HTML itself.** Claude briefs are styled HTML artifacts, and a sheet cell holds at most 50,000 characters. So the row carries the artifact link and a short digest, and the full brief opens in claude.ai.
+
+## How my agents report
 
 The tab (default `events`) has a header row and these columns:
 
@@ -53,7 +80,7 @@ The payload shapes Pulse understands:
 
 Unknown tasks still appear in Activity and Agents with their summary. Payloads come from LLMs, so Pulse strips markdown code fences and treats invalid JSON as empty instead of failing.
 
-To connect a task, append an instruction like this to the end of its prompt:
+Each of my tasks ends with an instruction like this:
 
 ```text
 At the end of the run, without asking for confirmation, append ONE new row to the end of the "events" tab of the "Pulse Inbox" spreadsheet. Do not touch existing rows.
@@ -68,9 +95,12 @@ If there is nothing to report, still append the row with an empty list.
 
 ## Stack
 
+The same skeleton as Gonteractive, so both apps build and deploy the same way.
+
+
 - **Backend**: Go, SQLite (`modernc.org/sqlite`, no CGO), `sqlc`, `goose` migrations, Google Sheets API.
 - **Frontend**: React, Vite, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query. It is embedded into the Go binary.
-- **Deployment**: one Docker image built by GitHub Actions and run by CasaOS on a home server, reached over Tailscale.
+- **Deployment**: one Docker image built by GitHub Actions and run on my home server (CasaOS / ZimaOS), reached over Tailscale.
 
 The result is a single binary and a single `.db` file.
 
@@ -86,9 +116,9 @@ Pulse reads the sheet with a service account.
 
 The key grants access to the sheet. Keep it out of git; `secrets/` is ignored.
 
-## CasaOS / ZimaOS
+## Running it on CasaOS / ZimaOS
 
-Everything below is done in the web UI; no SSH is needed. CasaOS and ZimaOS cannot build images, so they run the prebuilt one.
+This is how I run it at home. Everything is done in the web UI; no SSH is needed. CasaOS and ZimaOS cannot build images, so they run the prebuilt one.
 
 **1. Publish the image** (one time). Pushing to `master` runs [`.github/workflows/docker.yml`](.github/workflows/docker.yml), which builds `ghcr.io/<owner>/pulse` for amd64 and arm64. When the first run is green, open **Packages → pulse → Package settings** on GitHub and set the visibility to **Public**, so the server can pull it without logging in.
 
@@ -106,7 +136,7 @@ Paste the contents of [`deploy/casaos/docker-compose.yml`](deploy/casaos/docker-
 | `APP_PASSWORD` | Your sign-in password. Pulse refuses to start without it. |
 | `TZ` | Your time zone, for example `Europe/Madrid`. |
 | `PULSE_SHEET_ID` | The spreadsheet ID from [Google setup](#google-setup). |
-| `PULSE_APPS` | Your other apps by LAN address, for example `Gonteractive=http://192.168.1.10:8484;AI Job Search=http://192.168.1.10:3000`. |
+| `PULSE_APPS` | The other apps by LAN address, for example `Gonteractive=http://192.168.1.10:8484;AI Job Search=http://192.168.1.10:3000`. |
 
 Leave `GOOGLE_APPLICATION_CREDENTIALS`, `PULSE_SHEET_TAB` and `PULSE_SHEET_POLL` as they are, then press **Install**. The app's data lives in `/DATA/AppData/pulse/data`.
 
@@ -124,7 +154,7 @@ If Tailscale runs as an app container instead of on the host, prefix it with `do
 
 **Updating**: after a new image is published, use **Check then update** / **Update** on the app tile.
 
-Run only **one** Pulse with `PULSE_SHEET_ID` set. Every instance deletes the rows it syncs, so a second one, such as a local dev server, would steal reports from the first.
+Run only **one** Pulse with `PULSE_SHEET_ID` set. Every instance deletes the rows it syncs, so a second one, such as a local dev server, would steal reports from the one at home.
 
 ## Configuration
 
