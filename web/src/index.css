@@ -239,6 +239,11 @@
   backdrop-filter: blur(24px) saturate(1.4);
 }
 
+[data-wallpaper] [data-glass] {
+  background-color: color-mix(in oklab, var(--background) 55%, transparent);
+  backdrop-filter: blur(24px) saturate(1.4);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .enter {
     animation: none;

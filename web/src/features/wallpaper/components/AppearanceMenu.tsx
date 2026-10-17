@@ -1,20 +1,30 @@
 import { useRef } from "react"
-import { ImageIcon, ImageOffIcon, ImageUpIcon } from "lucide-react"
+import { ImageOffIcon, ImageUpIcon, MonitorIcon, MoonIcon, PaletteIcon, SunIcon } from "lucide-react"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useInterface } from "@/features/settings"
-import { useI18n } from "@/i18n"
+import { useI18n, type MessageKey } from "@/i18n"
 import { useWallpaper } from "../hooks/useWallpaper"
 
-export function WallpaperMenu() {
+const themes: { value: string; label: MessageKey; icon: typeof SunIcon }[] = [
+  { value: "light", label: "appearance.light", icon: SunIcon },
+  { value: "dark", label: "appearance.dark", icon: MoonIcon },
+  { value: "system", label: "appearance.system", icon: MonitorIcon },
+]
+
+export function AppearanceMenu() {
   const { t } = useI18n()
+  const { theme, setTheme } = useTheme()
   const input = useRef<HTMLInputElement>(null)
   const { version, upload, remove } = useWallpaper()
   const { dim, previewDim, commitDim } = useInterface()
@@ -34,11 +44,22 @@ export function WallpaperMenu() {
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label={t("wallpaper.label")} disabled={upload.isPending}>
-            <ImageIcon />
+          <Button variant="ghost" size="icon" aria-label={t("appearance.label")} disabled={upload.isPending}>
+            <PaletteIcon />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
+          <DropdownMenuLabel>{t("appearance.theme")}</DropdownMenuLabel>
+          <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+            {themes.map(({ value, label, icon: Icon }) => (
+              <DropdownMenuRadioItem key={value} value={value}>
+                <Icon />
+                {t(label)}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel>{t("wallpaper.label")}</DropdownMenuLabel>
           <DropdownMenuItem onSelect={() => input.current?.click()}>
             <ImageUpIcon />
             {version ? t("wallpaper.change") : t("wallpaper.choose")}
@@ -49,12 +70,11 @@ export function WallpaperMenu() {
                 <ImageOffIcon />
                 {t("wallpaper.remove")}
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="flex items-center justify-between">
-                {t("wallpaper.dim")}
-                <span className="tabular-nums text-muted-foreground">{dim}%</span>
-              </DropdownMenuLabel>
-              <div className="px-2 pb-2">
+              <div className="flex flex-col gap-1.5 px-2 pt-1 pb-2">
+                <span className="flex items-center justify-between text-xs text-muted-foreground">
+                  {t("wallpaper.dim")}
+                  <span className="tabular-nums">{dim}%</span>
+                </span>
                 <input
                   type="range"
                   min={0}

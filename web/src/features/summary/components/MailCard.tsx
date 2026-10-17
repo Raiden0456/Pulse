@@ -26,7 +26,7 @@ export function MailCard(props: ComponentProps<"div">) {
   return (
     <SummaryCard
       icon={MailIcon}
-      iconTone="text-hue-cyan"
+      tone="cyan"
       title={t("summary.mail.title")}
       aside={t("summary.week")}
       headline={headline}

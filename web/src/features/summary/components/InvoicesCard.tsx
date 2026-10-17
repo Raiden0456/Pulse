@@ -10,7 +10,7 @@ export function InvoicesCard({ latest, ...props }: { latest: PulseEvent | undefi
   const { t, locale } = useI18n()
   const base = {
     icon: ReceiptIcon,
-    iconTone: "text-hue-green",
+    tone: "green" as const,
     title: t("summary.invoices.title"),
     aside: new Date().toLocaleDateString(locale, { month: "long" }),
     ...props,

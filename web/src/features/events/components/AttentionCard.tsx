@@ -1,5 +1,6 @@
 import type { ComponentProps } from "react"
-import { ArrowUpRightIcon, CheckCircle2Icon, CircleAlertIcon, TriangleAlertIcon } from "lucide-react"
+import { ArrowUpRightIcon, BellRingIcon, CheckCircle2Icon, CircleAlertIcon, TriangleAlertIcon } from "lucide-react"
+import { IconChip } from "@/components/IconChip"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useI18n } from "@/i18n"
 import { cn } from "@/lib/utils"
@@ -11,9 +12,12 @@ export function AttentionCard({ items, ...props }: { items: AttentionItem[] } & 
   const { t } = useI18n()
   return (
     <Card {...props}>
-      <CardHeader>
-        <CardTitle>{t("attention.title")}</CardTitle>
-        <CardDescription>{t("attention.window")}</CardDescription>
+      <CardHeader className="flex flex-row items-center gap-3">
+        <IconChip icon={BellRingIcon} tone="red" />
+        <div>
+          <CardTitle>{t("attention.title")}</CardTitle>
+          <CardDescription>{t("attention.window")}</CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
         {items.length === 0 ? (

@@ -8,17 +8,17 @@ import { FUNNEL_STAGES, funnel, type FunnelStage } from "../utils/jobFunnel"
 import { SummaryCard } from "./SummaryCard"
 
 const stageTone: Record<FunnelStage, string> = {
-  drafted: "bg-muted-foreground/40",
-  applied: "bg-hue-blue",
-  interview: "bg-hue-purple",
-  offer: "bg-success",
+  drafted: "bg-primary/30",
+  applied: "bg-primary/55",
+  interview: "bg-primary/80",
+  offer: "bg-primary",
   closed: "bg-muted-foreground/20",
 }
 
 export function JobSearchCard(props: ComponentProps<"div">) {
   const { t } = useI18n()
   const summary = useQuery({ queryKey: ["summary", "jobsearch"], queryFn: summaryApi.jobSearch, refetchInterval: 5 * 60_000 })
-  const base = { icon: BriefcaseBusinessIcon, iconTone: "text-hue-blue", title: t("summary.jobs.title"), ...props }
+  const base = { icon: BriefcaseBusinessIcon, tone: "blue" as const, title: t("summary.jobs.title"), ...props }
   const data = summary.data
 
   if (!data?.configured) return <SummaryCard {...base} headline={t("summary.jobs.notConfigured")} headlineTone="text-muted-foreground" />
@@ -31,7 +31,7 @@ export function JobSearchCard(props: ComponentProps<"div">) {
       : stages.drafted > 0
         ? [t("summary.jobs.drafted", { count: stages.drafted }), ""]
         : stages.interview > 0
-          ? [t("summary.jobs.interview", { count: stages.interview }), "text-hue-purple"]
+          ? [t("summary.jobs.interview", { count: stages.interview }), "text-primary"]
           : stages.applied > 0
             ? [t("summary.jobs.waiting", { count: stages.applied }), ""]
             : [t("summary.jobs.clear"), "text-muted-foreground"]

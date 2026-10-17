@@ -8,7 +8,7 @@ import { authApi } from "@/features/auth"
 import { ActivityCard, AttentionCard, TasksCard, attentionItems, eventsApi } from "@/features/events"
 import { LanguageToggle, useInterface, useInterfaceSync } from "@/features/settings"
 import { InvoicesCard, JobSearchCard, MailCard } from "@/features/summary"
-import { WallpaperBackdrop, WallpaperMenu, useWallpaper } from "@/features/wallpaper"
+import { AppearanceMenu, WallpaperBackdrop, useWallpaper } from "@/features/wallpaper"
 import { useI18n } from "@/i18n"
 import { enter } from "@/lib/enter"
 import { greetingKey } from "../utils/greeting"
@@ -37,23 +37,31 @@ export function TodayPage() {
         <header {...enter(0)} className="enter flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src="/logo.svg" alt="" className="size-8" />
-            <span className="font-semibold tracking-tight">Pulse</span>
+            <span className="bg-gradient-to-r from-hue-blue to-hue-purple bg-clip-text font-semibold tracking-tight text-transparent">Pulse</span>
           </div>
           <div className="flex items-center gap-1">
             <LanguageToggle />
-            <WallpaperMenu />
+            <AppearanceMenu />
             <Button variant="ghost" size="icon" onClick={() => logout.mutate()} aria-label={t("auth.logout")}>
               <LogOutIcon />
             </Button>
           </div>
         </header>
 
-        <section {...enter(1)} className="enter flex flex-col gap-1">
-          <span className="text-xs uppercase tracking-wider text-muted-foreground">
-            {now.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}
-          </span>
-          <h1 className="text-3xl font-semibold tracking-tight">{t(greetingKey(now.getHours()))}, Raiden</h1>
-          <p className="text-muted-foreground">{t("today.subtitle")}</p>
+        <section
+          data-glass
+          {...enter(1)}
+          className="enter relative overflow-hidden rounded-2xl border bg-gradient-to-br from-hue-blue/20 via-hue-purple/12 to-hue-cyan/15 p-6"
+        >
+          <div className="pointer-events-none absolute -top-16 -right-10 size-48 rounded-full bg-hue-purple/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 left-1/3 size-48 rounded-full bg-hue-blue/20 blur-3xl" />
+          <div className="relative flex flex-col gap-1">
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">
+              {now.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}
+            </span>
+            <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{t(greetingKey(now.getHours()))}, Raiden</h1>
+            <p className="text-sm text-muted-foreground">{t("today.subtitle")}</p>
+          </div>
         </section>
 
         {(events.error || latest.error) && <ErrorAlert error={events.error ?? latest.error} />}

@@ -1,5 +1,6 @@
 import type { ComponentProps } from "react"
-import { AppWindowIcon, ArrowUpRightIcon } from "lucide-react"
+import { AppWindowIcon, ArrowUpRightIcon, LayoutGridIcon } from "lucide-react"
+import { IconChip } from "@/components/IconChip"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useI18n } from "@/i18n"
 import { cn } from "@/lib/utils"
@@ -9,7 +10,8 @@ export function AppsCard({ apps, ...props }: { apps: AppStatus[] } & ComponentPr
   const { t } = useI18n()
   return (
     <Card {...props}>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center gap-3">
+        <IconChip icon={LayoutGridIcon} tone="orange" />
         <CardTitle>{t("apps.title")}</CardTitle>
       </CardHeader>
       <CardContent>

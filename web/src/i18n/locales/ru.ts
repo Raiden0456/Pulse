@@ -98,6 +98,12 @@ export const ru: Messages = {
   "apps.online": "онлайн · {ms} мс",
   "apps.down": "недоступно",
 
+  "appearance.label": "Оформление",
+  "appearance.theme": "Тема",
+  "appearance.light": "Светлая",
+  "appearance.dark": "Тёмная",
+  "appearance.system": "Системная",
+
   "wallpaper.label": "Фон",
   "wallpaper.choose": "Выбрать фон",
   "wallpaper.change": "Сменить фон",

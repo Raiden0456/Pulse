@@ -1,5 +1,6 @@
 import type { ComponentProps } from "react"
-import { ArrowUpRightIcon } from "lucide-react"
+import { ActivityIcon, ArrowUpRightIcon } from "lucide-react"
+import { IconChip } from "@/components/IconChip"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useI18n } from "@/i18n"
@@ -12,7 +13,8 @@ export function ActivityCard({ events, ...props }: { events: PulseEvent[] } & Co
   const { t } = useI18n()
   return (
     <Card {...props}>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center gap-3">
+        <IconChip icon={ActivityIcon} tone="purple" />
         <CardTitle>{t("activity.title")}</CardTitle>
       </CardHeader>
       <CardContent>

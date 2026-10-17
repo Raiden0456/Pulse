@@ -79,6 +79,12 @@ export const en = {
   "apps.online": "online · {ms} ms",
   "apps.down": "unavailable",
 
+  "appearance.label": "Appearance",
+  "appearance.theme": "Theme",
+  "appearance.light": "Light",
+  "appearance.dark": "Dark",
+  "appearance.system": "System",
+
   "wallpaper.label": "Background",
   "wallpaper.choose": "Choose background",
   "wallpaper.change": "Change background",
