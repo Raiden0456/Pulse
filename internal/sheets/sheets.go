@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os"
 	"strings"
 	"time"
 
@@ -25,8 +26,12 @@ type Ingester struct {
 }
 
 func New(ctx context.Context, credFile, spreadsheetID, tab string, every time.Duration, ev *events.Service) (*Ingester, error) {
+	key, err := os.ReadFile(credFile)
+	if err != nil {
+		return nil, fmt.Errorf("read google credentials: %w", err)
+	}
 	svc, err := sheets.NewService(ctx,
-		option.WithAuthCredentialsFile(option.ServiceAccount, credFile),
+		option.WithAuthCredentialsJSON(option.ServiceAccount, key),
 		option.WithScopes(sheets.SpreadsheetsScope),
 	)
 	if err != nil {

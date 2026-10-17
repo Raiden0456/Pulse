@@ -86,23 +86,43 @@ Pulse reads the sheet with a service account.
 
 The key grants access to the sheet. Keep it out of git; `secrets/` is ignored.
 
-## CasaOS
+## CasaOS / ZimaOS
 
-CasaOS cannot build images, so it runs the prebuilt one. Tailscale runs on the host.
+Everything below is done in the web UI; no SSH is needed. CasaOS and ZimaOS cannot build images, so they run the prebuilt one.
 
-1. Publish the image. Pushing to `master` runs [`.github/workflows/docker.yml`](.github/workflows/docker.yml), which builds `ghcr.io/<owner>/pulse` for amd64 and arm64. On the first run, open **Packages → pulse → Package settings** on GitHub and make it **Public**, or run `docker login ghcr.io` on the server with a token that has `read:packages`.
-2. Put the key on the server. The container runs as uid 1000, so it has to own the file:
-   ```bash
-   sudo mkdir -p /DATA/AppData/pulse/data
-   sudo cp google.json /DATA/AppData/pulse/google.json
-   sudo chown 1000:1000 /DATA/AppData/pulse/google.json
-   sudo chmod 600 /DATA/AppData/pulse/google.json
-   ```
-3. In CasaOS, open **App Store → Custom Install → Import**, paste [`deploy/casaos/docker-compose.yml`](deploy/casaos/docker-compose.yml), and set at least `APP_PASSWORD`, `PULSE_SHEET_ID` and `PULSE_APPS`. Pulse refuses to start without a password. It listens on port `8485`.
-4. Open `http://<server>:8485` from any device in your tailnet. Traffic inside a tailnet is already encrypted. For an `https://` URL, run this on the server:
-   ```bash
-   sudo tailscale serve --bg --https=8485 http://127.0.0.1:8485
-   ```
+**1. Publish the image** (one time). Pushing to `master` runs [`.github/workflows/docker.yml`](.github/workflows/docker.yml), which builds `ghcr.io/<owner>/pulse` for amd64 and arm64. When the first run is green, open **Packages → pulse → Package settings** on GitHub and set the visibility to **Public**, so the server can pull it without logging in.
+
+**2. Upload the Google key.** Open the **Files** app and create the folder `/DATA/AppData/pulse/secrets` (on ZimaOS, `AppData` is listed under the system storage). Upload the service account key into it and rename it to exactly `google.json`. Do this before installing, or create the folder at least: Pulse only reads the key from that folder, and the container makes its own readable copy, so the file's owner and permissions do not matter.
+
+**3. Install the app.**
+
+- **CasaOS**: **App Store → Custom Install** (top right) → **Import** icon.
+- **ZimaOS**: **App Store → +** (top right) → **Install a customized app** → **Import**.
+
+Paste the contents of [`deploy/casaos/docker-compose.yml`](deploy/casaos/docker-compose.yml) and confirm. Then fill in the environment variables in the form:
+
+| Variable | What to put there |
+| --- | --- |
+| `APP_PASSWORD` | Your sign-in password. Pulse refuses to start without it. |
+| `TZ` | Your time zone, for example `Europe/Madrid`. |
+| `PULSE_SHEET_ID` | The spreadsheet ID from [Google setup](#google-setup). |
+| `PULSE_APPS` | Your other apps by LAN address, for example `Gonteractive=http://192.168.1.10:8484;AI Job Search=http://192.168.1.10:3000`. |
+
+Leave `GOOGLE_APPLICATION_CREDENTIALS`, `PULSE_SHEET_TAB` and `PULSE_SHEET_POLL` as they are, then press **Install**. The app's data lives in `/DATA/AppData/pulse/data`.
+
+**4. Open Pulse** with the app tile or at `http://<server-ip>:8485`, and sign in. Within a few seconds the rows waiting in the sheet appear on the dashboard and disappear from the sheet.
+
+If they do not, open the app's **logs** in the dashboard (the app tile menu → **Logs** / **Settings**). `sheet synced rows=N added=N` means it works. `sheet ingest disabled` means `PULSE_SHEET_ID` is empty. A permission error means the sheet is not shared with the service account. If the container keeps restarting, `google.json` is missing or misnamed while `PULSE_SHEET_ID` is set.
+
+**5. Optional HTTPS.** Traffic inside a tailnet is already encrypted, so `http://` works fine. For an `https://<server>.<tailnet>.ts.net` address, run this in a terminal on the server:
+
+```bash
+sudo tailscale serve --bg --https=8485 http://127.0.0.1:8485
+```
+
+If Tailscale runs as an app container instead of on the host, prefix it with `docker exec <tailscale-container>`.
+
+**Updating**: after a new image is published, use **Check then update** / **Update** on the app tile.
 
 Run only **one** Pulse with `PULSE_SHEET_ID` set. Every instance deletes the rows it syncs, so a second one, such as a local dev server, would steal reports from the first.
 
@@ -156,5 +176,5 @@ internal/
   store/              SQLite, migrations, sqlc queries
 web/                  React app (embedded into the binary)
   src/features/       today, events, apps, wallpaper, auth
-deploy/casaos/        CasaOS compose
+deploy/casaos/        CasaOS / ZimaOS compose
 ```
