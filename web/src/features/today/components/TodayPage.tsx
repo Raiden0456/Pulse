@@ -1,4 +1,3 @@
-import { useMemo } from "react"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { ActivityIcon, AppWindowIcon, BellRingIcon, LogOutIcon } from "lucide-react"
 import { ErrorAlert } from "@/components/ErrorAlert"
@@ -7,32 +6,36 @@ import { Button } from "@/components/ui/button"
 import { AppsCard, appsApi } from "@/features/apps"
 import { authApi } from "@/features/auth"
 import { ActivityCard, AttentionCard, TasksCard, attentionItems, eventsApi, isStale } from "@/features/events"
+import { LanguageToggle, useInterface, useInterfaceSync } from "@/features/settings"
 import { WallpaperBackdrop, WallpaperMenu, useWallpaper } from "@/features/wallpaper"
+import { useI18n } from "@/i18n"
 import { enter } from "@/lib/enter"
-import { greeting } from "../utils/greeting"
+import { greetingKey } from "../utils/greeting"
 import { StatTile } from "./StatTile"
 
 const REFRESH_MS = 60_000
 
 export function TodayPage() {
+  const { t, locale } = useI18n()
+  useInterfaceSync()
+  const ui = useInterface()
   const events = useQuery({ queryKey: ["events"], queryFn: () => eventsApi.list(), refetchInterval: REFRESH_MS })
   const latest = useQuery({ queryKey: ["events", "latest"], queryFn: eventsApi.latest, refetchInterval: REFRESH_MS })
   const apps = useQuery({ queryKey: ["apps"], queryFn: appsApi.list, refetchInterval: REFRESH_MS })
   const wallpaper = useWallpaper()
   const logout = useMutation({ mutationFn: authApi.logout, onSuccess: () => window.location.assign("/login") })
 
-  const attention = useMemo(() => attentionItems(events.data ?? []), [events.data])
-
-  if (events.isPending || latest.isPending || wallpaper.info.isPending) return <PageLoader />
+  if (events.isPending || latest.isPending || wallpaper.info.isPending || ui.query.isPending) return <PageLoader />
 
   const now = new Date()
+  const attention = attentionItems(events.data ?? [])
   const healthyTasks = (latest.data ?? []).filter((e) => e.status !== "error" && !isStale(e.task, e.run_at)).length
   const appsUp = (apps.data ?? []).filter((a) => a.up).length
   const critical = attention.filter((i) => i.severity === "critical").length
 
   return (
     <>
-      {wallpaper.version && <WallpaperBackdrop version={wallpaper.version} />}
+      {wallpaper.version && <WallpaperBackdrop version={wallpaper.version} dim={ui.dim} />}
       <div data-wallpaper={wallpaper.version ? "" : undefined} className="mx-auto flex min-h-svh max-w-6xl flex-col gap-6 p-4 sm:p-8">
         <header {...enter(0)} className="enter flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -40,8 +43,9 @@ export function TodayPage() {
             <span className="font-semibold tracking-tight">Pulse</span>
           </div>
           <div className="flex items-center gap-1">
+            <LanguageToggle />
             <WallpaperMenu />
-            <Button variant="ghost" size="icon" onClick={() => logout.mutate()} aria-label="Выйти">
+            <Button variant="ghost" size="icon" onClick={() => logout.mutate()} aria-label={t("auth.logout")}>
               <LogOutIcon />
             </Button>
           </div>
@@ -49,10 +53,10 @@ export function TodayPage() {
 
         <section {...enter(1)} className="enter flex flex-col gap-1">
           <span className="text-xs uppercase tracking-wider text-muted-foreground">
-            {now.toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" })}
+            {now.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}
           </span>
-          <h1 className="text-3xl font-semibold tracking-tight">{greeting(now.getHours())}, Raiden</h1>
-          <p className="text-muted-foreground">Вот что произошло, пока тебя не было.</p>
+          <h1 className="text-3xl font-semibold tracking-tight">{t(greetingKey(now.getHours()))}, Raiden</h1>
+          <p className="text-muted-foreground">{t("today.subtitle")}</p>
         </section>
 
         {(events.error || latest.error) && <ErrorAlert error={events.error ?? latest.error} />}
@@ -62,11 +66,11 @@ export function TodayPage() {
             {...enter(2)}
             icon={BellRingIcon}
             value={String(attention.length)}
-            label={critical ? `требуют внимания · ${critical} критичных` : "требуют внимания"}
+            label={critical ? t("today.statCritical", { count: critical }) : t("today.statAttention")}
             tone={critical ? "text-destructive" : attention.length ? "text-warning" : "text-success"}
           />
-          <StatTile {...enter(3)} icon={ActivityIcon} value={`${healthyTasks}/${latest.data?.length ?? 0}`} label="агентов в норме" tone="text-hue-purple" />
-          <StatTile {...enter(4)} icon={AppWindowIcon} value={apps.data ? `${appsUp}/${apps.data.length}` : "—"} label="приложений онлайн" tone="text-hue-blue" />
+          <StatTile {...enter(3)} icon={ActivityIcon} value={`${healthyTasks}/${latest.data?.length ?? 0}`} label={t("today.statAgents")} tone="text-hue-purple" />
+          <StatTile {...enter(4)} icon={AppWindowIcon} value={apps.data ? `${appsUp}/${apps.data.length}` : "—"} label={t("today.statApps")} tone="text-hue-blue" />
         </section>
 
         <div className="grid gap-6 lg:grid-cols-3">

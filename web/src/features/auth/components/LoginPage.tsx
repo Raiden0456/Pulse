@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useI18n } from "@/i18n"
 import { errorMessage } from "@/lib/api"
 import { authApi } from "../api"
 
 export function LoginPage() {
+  const { t } = useI18n()
   const [password, setPassword] = useState("")
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -31,17 +33,17 @@ export function LoginPage() {
         <CardHeader className="items-center text-center">
           <img src="/logo.svg" alt="" className="mx-auto mb-2 size-12" />
           <CardTitle className="text-xl">Pulse</CardTitle>
-          <CardDescription>Всё, что произошло, на одном экране</CardDescription>
+          <CardDescription>{t("auth.tagline")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Пароль</Label>
+              <Label htmlFor="password">{t("auth.password")}</Label>
               <Input id="password" type="password" autoFocus autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
             {login.error && <p className="text-sm text-destructive">{errorMessage(login.error)}</p>}
             <Button type="submit" disabled={!password || login.isPending}>
-              {login.isPending ? "Входим…" : "Войти"}
+              {login.isPending ? t("auth.signingIn") : t("auth.signIn")}
             </Button>
           </form>
         </CardContent>

@@ -2,20 +2,22 @@ import type { ComponentProps } from "react"
 import { ArrowUpRightIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useI18n } from "@/i18n"
 import type { PulseEvent } from "../types/event"
 import { sourceLabel, taskLabel } from "../utils/labels"
 import { briefPayload } from "../utils/payload"
 import { relativeTime } from "../utils/time"
 
 export function ActivityCard({ events, ...props }: { events: PulseEvent[] } & ComponentProps<"div">) {
+  const { t } = useI18n()
   return (
     <Card {...props}>
       <CardHeader>
-        <CardTitle>Активность</CardTitle>
+        <CardTitle>{t("activity.title")}</CardTitle>
       </CardHeader>
       <CardContent>
         {events.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Тут появятся отчёты агентов.</p>
+          <p className="text-sm text-muted-foreground">{t("activity.empty")}</p>
         ) : (
           <ol className="relative flex flex-col gap-5 border-l pl-5">
             {events.map((e) => (
@@ -29,6 +31,7 @@ export function ActivityCard({ events, ...props }: { events: PulseEvent[] } & Co
 }
 
 function ActivityItem({ event: e }: { event: PulseEvent }) {
+  const { t } = useI18n()
   const brief = briefPayload(e)
   return (
     <li className="relative">
@@ -36,7 +39,7 @@ function ActivityItem({ event: e }: { event: PulseEvent }) {
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-medium">{taskLabel(e.task)}</span>
         <Badge variant="outline">{sourceLabel(e.source)}</Badge>
-        {e.status === "error" && <Badge variant="destructive">ошибка</Badge>}
+        {e.status === "error" && <Badge variant="destructive">{t("activity.error")}</Badge>}
         <span className="ml-auto text-xs text-muted-foreground">{relativeTime(e.run_at)}</span>
       </div>
       {brief?.headline && <p className="mt-1 text-sm font-medium">{brief.headline}</p>}
@@ -50,7 +53,7 @@ function ActivityItem({ event: e }: { event: PulseEvent }) {
       )}
       {brief?.artifact_url && (
         <a href={brief.artifact_url} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-hue-blue hover:underline">
-          Открыть брифинг <ArrowUpRightIcon className="size-3.5" />
+          {t("activity.openBrief")} <ArrowUpRightIcon className="size-3.5" />
         </a>
       )}
     </li>

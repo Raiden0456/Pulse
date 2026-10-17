@@ -16,6 +16,7 @@ import (
 	"github.com/raiden0456/pulse/internal/config"
 	"github.com/raiden0456/pulse/internal/events"
 	"github.com/raiden0456/pulse/internal/server"
+	"github.com/raiden0456/pulse/internal/settings"
 	"github.com/raiden0456/pulse/internal/sheets"
 	"github.com/raiden0456/pulse/internal/store"
 	"github.com/raiden0456/pulse/internal/store/db"
@@ -63,6 +64,7 @@ func run() error {
 		eventService,
 		apps.New(cfg.Apps),
 		wallpaper.New(cfg.DataDir),
+		settings.New(q),
 	)
 
 	srv := &http.Server{Addr: cfg.Addr, Handler: handler, ReadHeaderTimeout: 10 * time.Second}

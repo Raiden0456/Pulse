@@ -1,23 +1,25 @@
 import type { ComponentProps } from "react"
 import { ArrowUpRightIcon, CheckCircle2Icon, CircleAlertIcon, TriangleAlertIcon } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useI18n } from "@/i18n"
 import { cn } from "@/lib/utils"
 import type { AttentionItem } from "../utils/attention"
 import { sourceLabel } from "../utils/labels"
 import { formatDate, relativeTime } from "../utils/time"
 
 export function AttentionCard({ items, ...props }: { items: AttentionItem[] } & ComponentProps<"div">) {
+  const { t } = useI18n()
   return (
     <Card {...props}>
       <CardHeader>
-        <CardTitle>Требует внимания</CardTitle>
-        <CardDescription>За последние 3 дня</CardDescription>
+        <CardTitle>{t("attention.title")}</CardTitle>
+        <CardDescription>{t("attention.window")}</CardDescription>
       </CardHeader>
       <CardContent>
         {items.length === 0 ? (
           <div className="flex items-center gap-3 rounded-lg bg-success/10 p-4 text-sm">
             <CheckCircle2Icon className="size-5 text-success" />
-            Ничего срочного. Можно выдохнуть.
+            {t("attention.empty")}
           </div>
         ) : (
           <ul className="flex flex-col divide-y">
@@ -32,6 +34,7 @@ export function AttentionCard({ items, ...props }: { items: AttentionItem[] } & 
 }
 
 function AttentionRow({ item }: { item: AttentionItem }) {
+  const { t } = useI18n()
   const critical = item.severity === "critical"
   const Icon = critical ? CircleAlertIcon : TriangleAlertIcon
   return (
@@ -41,7 +44,7 @@ function AttentionRow({ item }: { item: AttentionItem }) {
         <div className="flex items-start justify-between gap-2">
           <span className="font-medium leading-snug">{item.title}</span>
           {item.link && (
-            <a href={item.link} target="_blank" rel="noreferrer" className="shrink-0 text-muted-foreground hover:text-foreground" aria-label="Открыть">
+            <a href={item.link} target="_blank" rel="noreferrer" className="shrink-0 text-muted-foreground hover:text-foreground" aria-label={t("common.open")}>
               <ArrowUpRightIcon className="size-4" />
             </a>
           )}
@@ -50,7 +53,7 @@ function AttentionRow({ item }: { item: AttentionItem }) {
         {item.action && <p className="text-sm">→ {item.action}</p>}
         <p className="text-xs text-muted-foreground">
           {sourceLabel(item.source)} · {relativeTime(item.at)}
-          {item.deadline && <span className="text-destructive"> · до {formatDate(item.deadline)}</span>}
+          {item.deadline && <span className="text-destructive"> · {t("attention.until", { date: formatDate(item.deadline) })}</span>}
         </p>
       </div>
     </li>

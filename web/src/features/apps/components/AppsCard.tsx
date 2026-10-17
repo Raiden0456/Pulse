@@ -1,18 +1,20 @@
 import type { ComponentProps } from "react"
 import { AppWindowIcon, ArrowUpRightIcon } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useI18n } from "@/i18n"
 import { cn } from "@/lib/utils"
 import type { AppStatus } from "../types/app"
 
 export function AppsCard({ apps, ...props }: { apps: AppStatus[] } & ComponentProps<"div">) {
+  const { t } = useI18n()
   return (
     <Card {...props}>
       <CardHeader>
-        <CardTitle>Приложения</CardTitle>
+        <CardTitle>{t("apps.title")}</CardTitle>
       </CardHeader>
       <CardContent>
         {apps.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Добавь приложения в PULSE_APPS.</p>
+          <p className="text-sm text-muted-foreground">{t("apps.empty")}</p>
         ) : (
           <div className="grid gap-2">
             {apps.map((app) => (
@@ -28,7 +30,7 @@ export function AppsCard({ apps, ...props }: { apps: AppStatus[] } & ComponentPr
                   <span className="text-sm font-medium">{app.name}</span>
                   <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <span className={cn("size-2 rounded-full", app.up ? "bg-success" : "bg-destructive")} />
-                    {app.up ? `онлайн · ${app.latency_ms} мс` : "недоступно"}
+                    {app.up ? t("apps.online", { ms: app.latency_ms }) : t("apps.down")}
                   </span>
                 </div>
                 <ArrowUpRightIcon className="size-4 text-muted-foreground transition-colors group-hover:text-foreground" />

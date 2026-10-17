@@ -1,3 +1,4 @@
+import { t } from "@/i18n"
 import type { PulseEvent, Severity } from "../types/event"
 import { taskLabel } from "./labels"
 import { invoicesPayload, mailScanPayload } from "./payload"
@@ -25,7 +26,7 @@ export function attentionItems(events: PulseEvent[], now = Date.now() / 1000): A
 function fromEvent(e: PulseEvent): AttentionItem[] {
   const base = { source: e.source, at: e.run_at }
   if (e.status === "error") {
-    return [{ ...base, key: `${e.id}-error`, severity: "critical", title: `${taskLabel(e.task)}: ошибка выполнения`, detail: e.summary, action: null, deadline: null, link: null }]
+    return [{ ...base, key: `${e.id}-error`, severity: "critical", title: t("attention.runFailed", { task: taskLabel(e.task) }), detail: e.summary, action: null, deadline: null, link: null }]
   }
 
   const mail = mailScanPayload(e)
@@ -51,7 +52,7 @@ function fromEvent(e: PulseEvent): AttentionItem[] {
         key: `${e.id}-inv-${n}`,
         severity: i.state === "overdue" ? "critical" : "warning",
         title: `${i.counterparty}: ${i.amount} ${i.currency}`,
-        detail: i.state === "overdue" ? "Просрочена" : "Не оплачена",
+        detail: t(i.state === "overdue" ? "attention.overdue" : "attention.unpaid"),
         action: i.note,
         deadline: i.due_at,
         link: null,
@@ -60,7 +61,7 @@ function fromEvent(e: PulseEvent): AttentionItem[] {
       ...base,
       key: `${e.id}-issue-${n}`,
       severity: "warning",
-      title: "Фактуры",
+      title: t("attention.invoices"),
       detail: issue,
       action: null,
       deadline: null,

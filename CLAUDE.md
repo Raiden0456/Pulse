@@ -25,5 +25,5 @@ Same skeleton as gonteractive: Go stdlib `net/http`, SQLite (`modernc.org/sqlite
 
 - No code comments by default; doc comments only for non-obvious contracts.
 - Never edit `internal/store/db/*` by hand; schema changes = new goose migration.
-- UI strings are Russian, inline (no i18n).
+- UI is bilingual (ru/en): every user-facing string goes through `t()` from `@/i18n`, keys in `web/src/i18n/locales/en.ts` (source of truth, typed) and `ru.ts`. Task names are `task.<id>` keys. Language and wallpaper dimming are stored server-side (`/api/settings/interface`) so every device matches; the locale is also cached in localStorage.
 - Payloads come from LLMs: treat them as untrusted shape — guard in `utils/payload.ts`, never assume fields exist.

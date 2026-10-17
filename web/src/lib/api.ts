@@ -1,3 +1,5 @@
+import { hasMessage, t } from "@/i18n"
+
 export class ApiError extends Error {
   readonly status: number
   readonly code?: string
@@ -10,9 +12,9 @@ export class ApiError extends Error {
 }
 
 const codeMessages: Record<string, string> = {
-  wrong_password: "Неверный пароль",
-  wallpaper_too_large: "Фото больше 15 МБ",
-  wallpaper_not_image: "Это не картинка",
+  wrong_password: "errors.wrongPassword",
+  wallpaper_too_large: "errors.wallpaperTooLarge",
+  wallpaper_not_image: "errors.wallpaperNotImage",
 }
 
 type Method = "GET" | "POST" | "PUT" | "DELETE"
@@ -40,6 +42,9 @@ export const api = {
 }
 
 export function errorMessage(err: unknown): string {
-  if (err instanceof ApiError && err.code && codeMessages[err.code]) return codeMessages[err.code]
+  if (err instanceof ApiError && err.code) {
+    const key = codeMessages[err.code]
+    if (key && hasMessage(key)) return t(key)
+  }
   return err instanceof Error ? err.message : String(err)
 }

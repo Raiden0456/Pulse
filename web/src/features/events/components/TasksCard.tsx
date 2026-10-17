@@ -1,5 +1,6 @@
 import type { ComponentProps } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useI18n } from "@/i18n"
 import { cn } from "@/lib/utils"
 import type { PulseEvent } from "../types/event"
 import { sourceLabel, taskLabel } from "../utils/labels"
@@ -7,15 +8,16 @@ import { isStale } from "../utils/stale"
 import { relativeTime } from "../utils/time"
 
 export function TasksCard({ latest, ...props }: { latest: PulseEvent[] } & ComponentProps<"div">) {
+  const { t } = useI18n()
   return (
     <Card {...props}>
       <CardHeader>
-        <CardTitle>Агенты</CardTitle>
-        <CardDescription>Последний прогон каждой таски</CardDescription>
+        <CardTitle>{t("tasks.title")}</CardTitle>
+        <CardDescription>{t("tasks.description")}</CardDescription>
       </CardHeader>
       <CardContent>
         {latest.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Пока ни одного отчёта.</p>
+          <p className="text-sm text-muted-foreground">{t("tasks.empty")}</p>
         ) : (
           <ul className="flex flex-col gap-3">
             {latest.map((e) => {

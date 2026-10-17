@@ -27,7 +27,7 @@ On top of that I self-host two apps on my home server: [Gonteractive](https://gi
 
 Every morning I had to open the Claude app, the ChatGPT inbox, Gmail and two browser tabs to find out what had happened. I wanted one page that says "good morning, Raiden", shows what happened and what needs me right now, and lets me jump into the right app. That page is Pulse.
 
-It is built for exactly my setup: the greeting has my name in it, the UI is in Russian, and it knows the payloads of my own tasks. I am not trying to make it a product. If you want something similar, fork it and bend it to your own agents.
+It is built for exactly my setup: the greeting has my name in it, and it knows the payloads of my own tasks. I am not trying to make it a product. If you want something similar, fork it and bend it to your own agents.
 
 ## What it shows
 
@@ -36,7 +36,8 @@ It is built for exactly my setup: the greeting has my name in it, the UI is in R
 - **Agents**: the last run of every task. A task turns yellow when it has been quiet longer than its schedule allows (four days for the weekday briefs, so weekends do not count, and eight for the weekly review) and red when its last run failed.
 - **Activity**: a timeline of every report. Claude briefs show their headline and key points, with a link to the full HTML artifact.
 - **Apps**: Gonteractive and ai-job-search, health-checked from the server with their latency.
-- **Wallpaper**: I can put a photo behind everything, and the cards turn into frosted glass.
+- **Wallpaper**: I can put a photo behind everything, and the cards turn into frosted glass. A slider sets how much the photo is dimmed.
+- **Russian or English**: a toggle in the header. The language and the dimming are stored on the server, so my laptop and phone always match.
 
 ## Decisions
 

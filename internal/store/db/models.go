@@ -19,3 +19,8 @@ type Session struct {
 	TokenHash string
 	ExpiresAt int64
 }
+
+type Setting struct {
+	Key   string
+	Value string
+}
