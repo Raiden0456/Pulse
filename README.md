@@ -55,10 +55,10 @@ It is built for exactly my setup: the greeting has my name in it, and it knows t
 Both apps can write to Google Sheets through their connectors, though. So each run appends one row to a sheet called `Pulse Inbox`, and Pulse pulls from it.
 
 ```
-ChatGPT / Claude task ──append row──▶ Google Sheet "Pulse Inbox" ◀──poll + delete── Pulse ──▶ SQLite
+ChatGPT / Claude task ──append row──▶ Google Sheet "Pulse Inbox" ◀──poll (read-only)── Pulse ──▶ SQLite
 ```
 
-My Drive storage is tight and reserved for my invoices, so Pulse deletes every row once it has stored it, and the sheet stays empty. Rows are deduplicated on source, task and run time, and rows appended during a sync are picked up on the next poll.
+Pulse only reads the sheet and never changes it, so the sheet doubles as a plain log of every run that I can open and scroll. On each poll Pulse reads the whole tab and stores the rows it has not seen yet, keyed on source, task and run time. A row whose `run_at` cannot be parsed has no stable key, so Pulse skips it and logs a warning once.
 
 **Links to artifacts, not the HTML itself.** Claude briefs are styled HTML artifacts, and a sheet cell holds at most 50,000 characters. So the row carries the artifact link and a short digest, and the full brief opens in claude.ai.
 
@@ -116,7 +116,7 @@ Pulse reads the sheet with a service account.
 1. In the [Google Cloud console](https://console.cloud.google.com), create a project and enable the **Google Sheets API**.
 2. Create credentials for **Application data**, which creates a service account. Skip the role step.
 3. Open the service account, go to **Keys → Add key → Create new key → JSON**, and save the file.
-4. Share the `Pulse Inbox` spreadsheet with the service account's e-mail as **Editor**. Editor access is needed to delete synced rows.
+4. Share the `Pulse Inbox` spreadsheet with the service account's e-mail as **Viewer**. Pulse only reads it.
 5. Copy the spreadsheet ID from its URL: `docs.google.com/spreadsheets/d/<ID>/edit`.
 
 The key grants access to the sheet. Keep it out of git; `secrets/` is ignored.
@@ -147,9 +147,9 @@ Paste the contents of [`deploy/casaos/docker-compose.yml`](deploy/casaos/docker-
 
 Leave `GOOGLE_APPLICATION_CREDENTIALS`, `PULSE_SHEET_TAB` and `PULSE_SHEET_POLL` as they are, then press **Install**. The app's data lives in `/DATA/AppData/pulse/data`.
 
-**4. Open Pulse** with the app tile or at `http://<server-ip>:8485`, and sign in. Within a few seconds the rows waiting in the sheet appear on the dashboard and disappear from the sheet.
+**4. Open Pulse** with the app tile or at `http://<server-ip>:8485`, and sign in. Within a few seconds the rows from the sheet appear on the dashboard. The sheet itself stays untouched.
 
-If they do not, open the app's **logs** in the dashboard (the app tile menu → **Logs** / **Settings**). `sheet synced rows=N added=N` means it works. `sheet ingest disabled` means `PULSE_SHEET_ID` is empty. A permission error means the sheet is not shared with the service account. If the container keeps restarting, `google.json` is missing or misnamed while `PULSE_SHEET_ID` is set.
+If they do not, open the app's **logs** in the dashboard (the app tile menu → **Logs** / **Settings**). `sheet synced rows=N added=N` means new rows were picked up (it is only logged when something new arrives). `sheet ingest disabled` means `PULSE_SHEET_ID` is empty. A permission error means the sheet is not shared with the service account. If the container keeps restarting, `google.json` is missing or misnamed while `PULSE_SHEET_ID` is set.
 
 **5. Optional HTTPS.** Traffic inside a tailnet is already encrypted, so `http://` works fine. For an `https://<server>.<tailnet>.ts.net` address, run this in a terminal on the server:
 
@@ -160,8 +160,6 @@ sudo tailscale serve --bg --https=8485 http://127.0.0.1:8485
 If Tailscale runs as an app container instead of on the host, prefix it with `docker exec <tailscale-container>`.
 
 **Updating**: after a new image is published, use **Check then update** / **Update** on the app tile.
-
-Run only **one** Pulse with `PULSE_SHEET_ID` set. Every instance deletes the rows it syncs, so a second one, such as a local dev server, would steal reports from the one at home.
 
 ## Configuration
 
@@ -196,7 +194,7 @@ make dev-api   # API on :8080; reads .env, password defaults to "dev"
 make dev-web   # Vite on :5173, proxies /api to :8080
 ```
 
-Open http://localhost:5173. Leave `PULSE_SHEET_ID` empty locally while the server is running (see above).
+Open http://localhost:5173. Setting `PULSE_SHEET_ID` locally is safe: Pulse only reads the sheet, so a dev instance does not interfere with the one at home.
 
 | Command | What it does |
 | --- | --- |
@@ -209,7 +207,7 @@ Open http://localhost:5173. Leave `PULSE_SHEET_ID` empty locally while the serve
 ```
 cmd/pulse/            entry point
 internal/
-  sheets/             Google Sheets ingester (pull, store, delete)
+  sheets/             Google Sheets ingester (read-only)
   events/             event storage and API
   apps/               app links and health checks
   wallpaper/          background image upload and serving

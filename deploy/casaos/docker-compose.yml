@@ -71,7 +71,7 @@ services:
             en_US: Database and wallpaper
         - container: /secrets
           description:
-            en_US: Folder with google.json, the service account key with Editor access to the sheet
+            en_US: Folder with google.json, the service account key with access to the sheet
 x-casaos:
   main: pulse
   architectures:

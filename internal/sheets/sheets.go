@@ -17,12 +17,12 @@ import (
 const columns = 6
 
 type Ingester struct {
-	svc     *sheets.Service
-	id      string
-	tab     string
-	every   time.Duration
-	events  *events.Service
-	sheetID *int64
+	svc    *sheets.Service
+	id     string
+	tab    string
+	every  time.Duration
+	events *events.Service
+	warned map[int]bool
 }
 
 func New(ctx context.Context, credFile, spreadsheetID, tab string, every time.Duration, ev *events.Service) (*Ingester, error) {
@@ -32,12 +32,12 @@ func New(ctx context.Context, credFile, spreadsheetID, tab string, every time.Du
 	}
 	svc, err := sheets.NewService(ctx,
 		option.WithAuthCredentialsJSON(option.ServiceAccount, key),
-		option.WithScopes(sheets.SpreadsheetsScope),
+		option.WithScopes(sheets.SpreadsheetsReadonlyScope),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("sheets client: %w", err)
 	}
-	return &Ingester{svc: svc, id: spreadsheetID, tab: tab, every: every, events: ev}, nil
+	return &Ingester{svc: svc, id: spreadsheetID, tab: tab, every: every, events: ev, warned: map[int]bool{}}, nil
 }
 
 func (in *Ingester) Run(ctx context.Context) {
@@ -55,15 +55,12 @@ func (in *Ingester) Run(ctx context.Context) {
 	}
 }
 
-// Sync moves every data row of the tab into the events table, then deletes those rows from the sheet.
-// Rows appended while a sync runs sit below the deleted range and are picked up next time.
+// Sync reads the whole tab and stores rows it has not seen yet. The sheet is append-only and doubles
+// as a log, so nothing is ever deleted; already stored rows are skipped by their source, task and run time.
 func (in *Ingester) Sync(ctx context.Context) error {
 	resp, err := in.svc.Spreadsheets.Values.Get(in.id, in.tab+"!A2:F").Context(ctx).Do()
 	if err != nil {
 		return fmt.Errorf("read rows: %w", err)
-	}
-	if len(resp.Values) == 0 {
-		return nil
 	}
 
 	added := 0
@@ -72,66 +69,26 @@ func (in *Ingester) Sync(ctx context.Context) error {
 		if !ok {
 			continue
 		}
+		rowNum := i + 2
 		if input.RunAt.IsZero() {
-			slog.Warn("sheet row has invalid run_at", "row", i+2)
-			input.RunAt = time.Now()
+			if !in.warned[rowNum] {
+				slog.Warn("sheet row skipped: invalid run_at", "row", rowNum)
+				in.warned[rowNum] = true
+			}
+			continue
 		}
 		isNew, err := in.events.Ingest(ctx, input)
 		if err != nil {
-			return fmt.Errorf("ingest row %d: %w", i+2, err)
+			return fmt.Errorf("ingest row %d: %w", rowNum, err)
 		}
 		if isNew {
 			added++
 		}
 	}
-
-	if err := in.deleteRows(ctx, len(resp.Values)); err != nil {
-		return err
-	}
-	slog.Info("sheet synced", "rows", len(resp.Values), "added", added)
-	return nil
-}
-
-func (in *Ingester) deleteRows(ctx context.Context, n int) error {
-	sheetID, err := in.resolveSheetID(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = in.svc.Spreadsheets.BatchUpdate(in.id, &sheets.BatchUpdateSpreadsheetRequest{
-		Requests: []*sheets.Request{{
-			DeleteDimension: &sheets.DeleteDimensionRequest{
-				Range: &sheets.DimensionRange{
-					SheetId:         sheetID,
-					Dimension:       "ROWS",
-					StartIndex:      1,
-					EndIndex:        int64(1 + n),
-					ForceSendFields: []string{"SheetId"},
-				},
-			},
-		}},
-	}).Context(ctx).Do()
-	if err != nil {
-		return fmt.Errorf("delete synced rows: %w", err)
+	if added > 0 {
+		slog.Info("sheet synced", "rows", len(resp.Values), "added", added)
 	}
 	return nil
-}
-
-func (in *Ingester) resolveSheetID(ctx context.Context) (int64, error) {
-	if in.sheetID != nil {
-		return *in.sheetID, nil
-	}
-	ss, err := in.svc.Spreadsheets.Get(in.id).Fields("sheets.properties").Context(ctx).Do()
-	if err != nil {
-		return 0, fmt.Errorf("read spreadsheet: %w", err)
-	}
-	for _, s := range ss.Sheets {
-		if s.Properties.Title == in.tab {
-			id := s.Properties.SheetId
-			in.sheetID = &id
-			return id, nil
-		}
-	}
-	return 0, fmt.Errorf("tab %q not found", in.tab)
 }
 
 func parseRow(row []any) (events.Input, bool) {

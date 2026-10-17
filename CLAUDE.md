@@ -5,7 +5,7 @@ Self-hosted, single-user home dashboard: what my AI agents did, what needs atten
 ## Data flow
 
 - ChatGPT scheduled tasks can't make HTTP calls, so they append one row per run to the Google Sheet `Pulse Inbox`, tab `events`: `run_at | source | task | status | summary | payload` (payload = JSON in one cell).
-- `internal/sheets` polls the tab every `PULSE_SHEET_POLL` with a service account (sheet shared with it as Editor), upserts rows into `events` (unique on source+task+run_at), then deletes the synced rows from the sheet.
+- `internal/sheets` polls the tab every `PULSE_SHEET_POLL` with a read-only service account and inserts rows it has not stored yet (unique on source+task+run_at). The sheet is never modified: it stays as an append-only log. Rows with an unparseable `run_at` are skipped with a one-time warning, since there is no stable key for them.
 - Known tasks: ChatGPT `mail-scan` (`{scanned, items[]}`), `invoices` (`{invoices[], totals, issues[]}`); Claude `morning-brief`, `pre-standup-brief`, `weekly-review` (`{artifact_url, headline, highlights[]}` — the HTML stays a claude.ai artifact, Pulse only links it). Per-task staleness thresholds live in `utils/stale.ts`. Shapes live in `web/src/features/events/types/event.ts`; attention items are derived client-side in `utils/attention.ts`.
 - Wallpaper: single image in `$APP_DATA_DIR/wallpaper`, served at `/api/wallpaper/image?v=<mtime>` (immutable cache). When set, the root gets `data-wallpaper` and cards turn into blurred glass (`index.css`, kept outside `@layer` so it beats `bg-card`).
 - First render staggers in via `.enter` + `enter(i)` from `lib/enter.ts`; pass it straight to the Card, not a wrapper — opacity on a wrapper breaks the card's backdrop blur mid-animation.
