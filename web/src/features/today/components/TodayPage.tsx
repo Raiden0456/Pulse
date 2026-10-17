@@ -7,7 +7,7 @@ import { AppsCard, appsApi } from "@/features/apps"
 import { authApi } from "@/features/auth"
 import { ActivityCard, AttentionCard, TasksCard, attentionItems, eventsApi } from "@/features/events"
 import { LanguageToggle, useInterface, useInterfaceSync } from "@/features/settings"
-import { InvoicesCard, JobSearchCard, MailCard } from "@/features/summary"
+import { GonteractiveCard, InvoicesCard, JobSearchCard, MailCard } from "@/features/summary"
 import { AppearanceMenu, WallpaperBackdrop, useWallpaper } from "@/features/wallpaper"
 import { useI18n } from "@/i18n"
 import { enter } from "@/lib/enter"
@@ -58,20 +58,21 @@ export function TodayPage() {
 
         {(events.error || latest.error) && <ErrorAlert error={events.error ?? latest.error} />}
 
-        <section className="grid gap-3 sm:grid-cols-3">
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <JobSearchCard {...enter(2)} />
-          <MailCard {...enter(3)} />
-          <InvoicesCard {...enter(4)} latest={latest.data?.find((e) => e.task === "invoices")} />
+          <GonteractiveCard {...enter(3)} />
+          <MailCard {...enter(4)} />
+          <InvoicesCard {...enter(5)} latest={latest.data?.find((e) => e.task === "invoices")} />
         </section>
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="flex flex-col gap-6 lg:col-span-2">
-            <AttentionCard {...enter(5)} items={attention} />
-            <ActivityCard {...enter(7)} events={events.data ?? []} />
+            <AttentionCard {...enter(6)} items={attention} />
+            <ActivityCard {...enter(8)} events={events.data ?? []} />
           </div>
           <div className="flex flex-col gap-6">
-            <AppsCard {...enter(6)} apps={apps.data ?? []} />
-            <TasksCard {...enter(8)} latest={latest.data ?? []} />
+            <AppsCard {...enter(7)} apps={apps.data ?? []} />
+            <TasksCard {...enter(9)} latest={latest.data ?? []} />
           </div>
         </div>
       </div>

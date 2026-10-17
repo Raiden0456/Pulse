@@ -15,6 +15,7 @@ import (
 	"github.com/raiden0456/pulse/internal/auth"
 	"github.com/raiden0456/pulse/internal/config"
 	"github.com/raiden0456/pulse/internal/events"
+	"github.com/raiden0456/pulse/internal/gonteractive"
 	"github.com/raiden0456/pulse/internal/jobsearch"
 	"github.com/raiden0456/pulse/internal/server"
 	"github.com/raiden0456/pulse/internal/settings"
@@ -67,6 +68,7 @@ func run() error {
 		wallpaper.New(cfg.DataDir),
 		settings.New(q),
 		jobsearch.New(cfg.JobSearchURL, cfg.JobSearchPass),
+		gonteractive.New(cfg.GonteractURL, cfg.GonteractPass),
 	)
 
 	srv := &http.Server{Addr: cfg.Addr, Handler: handler, ReadHeaderTimeout: 10 * time.Second}

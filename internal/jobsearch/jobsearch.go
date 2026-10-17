@@ -1,28 +1,18 @@
 package jobsearch
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
-	"net/http/cookiejar"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/raiden0456/pulse/internal/httpx"
+	"github.com/raiden0456/pulse/internal/remote"
 )
 
-const (
-	requestTimeout = 5 * time.Second
-	staleAfter     = 10 * 24 * time.Hour
-)
-
-var errUnauthorized = errors.New("unauthorized")
+const staleAfter = 10 * 24 * time.Hour
 
 type application struct {
 	Date   string `json:"date"`
@@ -53,19 +43,11 @@ type Summary struct {
 }
 
 type Service struct {
-	base     string
-	password string
-	client   *http.Client
-	loginMu  sync.Mutex
+	client *remote.Client
 }
 
 func New(base, password string) *Service {
-	jar, _ := cookiejar.New(nil)
-	return &Service{
-		base:     strings.TrimRight(base, "/"),
-		password: password,
-		client:   &http.Client{Jar: jar, Timeout: requestTimeout},
-	}
+	return &Service{client: remote.New(base, password)}
 }
 
 func (s *Service) Routes(mux *http.ServeMux) {
@@ -73,14 +55,14 @@ func (s *Service) Routes(mux *http.ServeMux) {
 }
 
 func (s *Service) summary(w http.ResponseWriter, r *http.Request) error {
-	if s.base == "" {
+	if !s.client.Configured() {
 		httpx.JSON(w, http.StatusOK, Summary{})
 		return nil
 	}
 	sum, err := s.Summary(r.Context(), time.Now())
 	if err != nil {
 		slog.Warn("job search summary unavailable", "err", err)
-		httpx.JSON(w, http.StatusOK, Summary{URL: s.base, Configured: true})
+		httpx.JSON(w, http.StatusOK, Summary{URL: s.client.Base(), Configured: true})
 		return nil
 	}
 	httpx.JSON(w, http.StatusOK, sum)
@@ -89,15 +71,15 @@ func (s *Service) summary(w http.ResponseWriter, r *http.Request) error {
 
 func (s *Service) Summary(ctx context.Context, now time.Time) (Summary, error) {
 	var apps []application
-	if err := s.get(ctx, "/api/applications", &apps); err != nil {
+	if err := s.client.Get(ctx, "/api/applications", &apps); err != nil {
 		return Summary{}, err
 	}
 	var jobs []job
-	if err := s.get(ctx, "/api/jobs", &jobs); err != nil {
+	if err := s.client.Get(ctx, "/api/jobs", &jobs); err != nil {
 		return Summary{}, err
 	}
 	sum := summarize(apps, jobs, now)
-	sum.URL = s.base
+	sum.URL = s.client.Base()
 	return sum, nil
 }
 
@@ -144,54 +126,4 @@ func lastActivity(a application) time.Time {
 		}
 	}
 	return latest
-}
-
-func (s *Service) get(ctx context.Context, path string, out any) error {
-	err := s.fetch(ctx, path, out)
-	if errors.Is(err, errUnauthorized) && s.password != "" {
-		if err := s.login(ctx); err != nil {
-			return err
-		}
-		err = s.fetch(ctx, path, out)
-	}
-	return err
-}
-
-func (s *Service) fetch(ctx context.Context, path string, out any) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.base+path, nil)
-	if err != nil {
-		return err
-	}
-	resp, err := s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	switch {
-	case resp.StatusCode == http.StatusUnauthorized:
-		return errUnauthorized
-	case resp.StatusCode != http.StatusOK:
-		return fmt.Errorf("GET %s: %s", path, resp.Status)
-	}
-	return json.NewDecoder(resp.Body).Decode(out)
-}
-
-func (s *Service) login(ctx context.Context) error {
-	s.loginMu.Lock()
-	defer s.loginMu.Unlock()
-	body, _ := json.Marshal(map[string]string{"password": s.password})
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.base+"/api/auth/login", bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("job search login: %s", resp.Status)
-	}
-	return nil
 }

@@ -31,8 +31,9 @@ It is built for exactly my setup: the greeting has my name in it, and it knows t
 
 ## What it shows
 
-- **Today**: the greeting and three summary cards, each with one headline and one tiny chart:
+- **Today**: the greeting and four summary cards, each with one headline and one tiny chart:
   - **Job search**: a funnel bar from drafts to offers and the shortlist size, headlined by whatever needs action first: applications quiet for 10+ days, then unsent drafts. Pulled live from ai-job-search.
+  - **Gonteractive**: whether today's daily Go quiz is done (with the score), in progress or still scheduled, my streak, and practice over the last week. Pulled live from Gonteractive.
   - **Mail**: critical and warning emails per day over the last week.
   - **Invoices**: paid versus to-pay this month and the next due date.
 - **Needs attention**: critical and warning emails from the mail scan, overdue or unpaid invoices and invoice issues, plus any agent run that failed, all from the last three days. The most severe items come first, each with a link straight to the email.
@@ -142,6 +143,7 @@ Paste the contents of [`deploy/casaos/docker-compose.yml`](deploy/casaos/docker-
 | `PULSE_SHEET_ID` | The spreadsheet ID from [Google setup](#google-setup). |
 | `PULSE_APPS` | The other apps by LAN address, for example `Gonteractive=http://192.168.1.10:8484;AI Job Search=http://192.168.1.10:3000`. |
 | `JOBSEARCH_URL`, `JOBSEARCH_PASSWORD` | ai-job-search's address and password, for the job search card. |
+| `GONTERACTIVE_URL`, `GONTERACTIVE_PASSWORD` | Gonteractive's address and password, for the streak and daily quiz card. |
 
 Leave `GOOGLE_APPLICATION_CREDENTIALS`, `PULSE_SHEET_TAB` and `PULSE_SHEET_POLL` as they are, then press **Install**. The app's data lives in `/DATA/AppData/pulse/data`.
 
@@ -174,6 +176,8 @@ Run only **one** Pulse with `PULSE_SHEET_ID` set. Every instance deletes the row
 | `PULSE_APPS` | (empty) | Apps to link and health-check: `Name=http://host:port;Other=http://host:port`. Use addresses the container can reach, such as the server's LAN IP; `*.ts.net` names may not resolve inside Docker. |
 | `JOBSEARCH_URL` | (empty) | Base URL of ai-job-search for the summary card, for example `http://192.168.1.10:8095`. The card asks to be connected when empty. |
 | `JOBSEARCH_PASSWORD` | (empty) | ai-job-search's `APP_PASSWORD`. Pulse signs in like a browser and reuses the session cookie, so the fork needs no changes. |
+| `GONTERACTIVE_URL` | (empty) | Base URL of Gonteractive for the streak and daily quiz card, for example `http://192.168.1.10:8484`. |
+| `GONTERACTIVE_PASSWORD` | (empty) | Gonteractive's `APP_PASSWORD`, used the same way as for ai-job-search. |
 | `APP_ADDR` | `:8080` | HTTP listen address. |
 | `APP_DATA_DIR` | `data` (`/data` in Docker) | Location of the SQLite database and the wallpaper. |
 | `APP_COOKIE_SECURE` | `auto` | `auto` marks the session cookie `Secure` only for HTTPS requests; `true`/`false` force it. |
@@ -209,7 +213,9 @@ internal/
   events/             event storage and API
   apps/               app links and health checks
   wallpaper/          background image upload and serving
-  jobsearch/          ai-job-search client and summary
+  remote/             cookie-session client for my other apps
+  jobsearch/          ai-job-search summary
+  gonteractive/       Gonteractive streak and daily quiz summary
   settings/           language and wallpaper dimming
   auth/ config/ httpx/ server/
   store/              SQLite, migrations, sqlc queries

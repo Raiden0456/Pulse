@@ -48,6 +48,19 @@ export const ru: Messages = {
   "summary.jobs.stage.offer": "оффер",
   "summary.jobs.stage.closed": "закрыто",
 
+  "summary.go.title": "Gonteractive",
+  "summary.go.notConfigured": "Подключи через GONTERACTIVE_URL",
+  "summary.go.unavailable": "Gonteractive недоступен",
+  "summary.go.streak": { one: "{count} день", few: "{count} дня", many: "{count} дней", other: "{count} дня" },
+  "summary.go.done": "Ежедневный квиз пройден",
+  "summary.go.doneScore": "Ежедневный квиз пройден · {score}%",
+  "summary.go.inProgress": "Ежедневный квиз: {answered} из {total}",
+  "summary.go.scheduledAt": "Ежедневный квиз в {time}",
+  "summary.go.preparing": "Ежедневный квиз готовится",
+  "summary.go.idle": "Сегодня ещё не занимался",
+  "summary.go.active": "Сегодня уже занимался",
+  "summary.go.footer": "на повторение {due} · ответов сегодня {answers}",
+
   "summary.mail.title": "Почта",
   "summary.mail.criticalToday": {
     one: "{count} критичное сегодня",

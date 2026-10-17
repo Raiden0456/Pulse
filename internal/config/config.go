@@ -27,6 +27,8 @@ type Config struct {
 	Apps           []App
 	JobSearchURL   string
 	JobSearchPass  string
+	GonteractURL   string
+	GonteractPass  string
 }
 
 func (c Config) DBPath() string {
@@ -43,6 +45,8 @@ func Load() (Config, error) {
 		GoogleCredFile: os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"),
 		JobSearchURL:   os.Getenv("JOBSEARCH_URL"),
 		JobSearchPass:  os.Getenv("JOBSEARCH_PASSWORD"),
+		GonteractURL:   os.Getenv("GONTERACTIVE_URL"),
+		GonteractPass:  os.Getenv("GONTERACTIVE_PASSWORD"),
 	}
 	if c.Password == "" {
 		return c, errors.New("APP_PASSWORD is required")
