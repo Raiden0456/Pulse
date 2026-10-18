@@ -1,6 +1,7 @@
 import type { ComponentProps } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { CheckCircle2Icon, FlameIcon, GraduationCapIcon } from "lucide-react"
+import { appLogo } from "@/features/apps"
 import { useI18n } from "@/i18n"
 import { cn } from "@/lib/utils"
 import { summaryApi } from "../api"
@@ -10,7 +11,7 @@ import { SummaryCard } from "./SummaryCard"
 export function GonteractiveCard(props: ComponentProps<"div">) {
   const { t, locale } = useI18n()
   const summary = useQuery({ queryKey: ["summary", "gonteractive"], queryFn: summaryApi.gonteractive, refetchInterval: 60_000 })
-  const base = { icon: GraduationCapIcon, tone: "purple" as const, title: t("summary.go.title"), ...props }
+  const base = { icon: GraduationCapIcon, tone: "purple" as const, logo: appLogo("burrow"), title: t("summary.go.title"), ...props }
   const data = summary.data
 
   if (!data?.configured) return <SummaryCard {...base} headline={t("summary.go.notConfigured")} headlineTone="text-muted-foreground" />

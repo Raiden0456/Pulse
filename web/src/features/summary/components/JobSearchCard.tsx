@@ -2,6 +2,7 @@ import type { ComponentProps } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { BriefcaseBusinessIcon } from "lucide-react"
 import { StackedBar } from "@/components/StackedBar"
+import { appLogo } from "@/features/apps"
 import { useI18n } from "@/i18n"
 import { summaryApi } from "../api"
 import { FUNNEL_STAGES, funnel, type FunnelStage } from "../utils/jobFunnel"
@@ -18,7 +19,7 @@ const stageTone: Record<FunnelStage, string> = {
 export function JobSearchCard(props: ComponentProps<"div">) {
   const { t } = useI18n()
   const summary = useQuery({ queryKey: ["summary", "jobsearch"], queryFn: summaryApi.jobSearch, refetchInterval: 5 * 60_000 })
-  const base = { icon: BriefcaseBusinessIcon, tone: "blue" as const, title: t("summary.jobs.title"), ...props }
+  const base = { icon: BriefcaseBusinessIcon, tone: "blue" as const, logo: appLogo("scout"), title: t("summary.jobs.title"), ...props }
   const data = summary.data
 
   if (!data?.configured) return <SummaryCard {...base} headline={t("summary.jobs.notConfigured")} headlineTone="text-muted-foreground" />

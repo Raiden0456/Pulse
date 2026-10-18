@@ -23,9 +23,9 @@ export const ru: Messages = {
   "today.subtitle": "Вот что произошло, пока тебя не было.",
 
   "summary.week": "7 дней",
-  "summary.jobs.title": "Поиск работы",
+  "summary.jobs.title": "Scout",
   "summary.jobs.notConfigured": "Подключи через JOBSEARCH_URL",
-  "summary.jobs.unavailable": "ai-job-search недоступен",
+  "summary.jobs.unavailable": "Scout недоступен",
   "summary.jobs.stale": {
     one: "{count} заявка молчит 10+ дней",
     few: "{count} заявки молчат 10+ дней",
@@ -48,9 +48,9 @@ export const ru: Messages = {
   "summary.jobs.stage.offer": "оффер",
   "summary.jobs.stage.closed": "закрыто",
 
-  "summary.go.title": "Gonteractive",
+  "summary.go.title": "Burrow",
   "summary.go.notConfigured": "Подключи через GONTERACTIVE_URL",
-  "summary.go.unavailable": "Gonteractive недоступен",
+  "summary.go.unavailable": "Burrow недоступен",
   "summary.go.streak": { one: "{count} день", few: "{count} дня", many: "{count} дней", other: "{count} дня" },
   "summary.go.done": "Ежедневный квиз пройден",
   "summary.go.doneScore": "Ежедневный квиз пройден · {score}%",

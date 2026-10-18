@@ -51,16 +51,16 @@ services:
             en_US: "Apps to link and health-check: Name=http://host:port;Other=http://host:port"
         - container: JOBSEARCH_URL
           description:
-            en_US: "ai-job-search base URL for the summary card, e.g. http://192.168.1.10:8095"
+            en_US: "Scout (ai-job-search) base URL for the summary card, e.g. http://192.168.1.10:8095"
         - container: JOBSEARCH_PASSWORD
           description:
-            en_US: ai-job-search APP_PASSWORD (empty if it has none)
+            en_US: Scout (ai-job-search) APP_PASSWORD (empty if it has none)
         - container: GONTERACTIVE_URL
           description:
-            en_US: "Gonteractive base URL for the streak and daily quiz card, e.g. http://192.168.1.10:8484"
+            en_US: "Burrow (gonteractive) base URL for the streak and daily quiz card, e.g. http://192.168.1.10:8484"
         - container: GONTERACTIVE_PASSWORD
           description:
-            en_US: Gonteractive APP_PASSWORD
+            en_US: Burrow (gonteractive) APP_PASSWORD
       ports:
         - container: "8080"
           description:

@@ -23,7 +23,7 @@ I run a bunch of AI automations, and they were scattered across too many places.
 | ChatGPT (personal) | Scan my mail for critical and problematic emails | scheduled |
 | ChatGPT (personal) | Keep my invoices in order in Google Drive | scheduled |
 
-On top of that I self-host two apps on my home server: [Gonteractive](https://github.com/Raiden0456/gonteractive), my Go tutor, and a fork of [ai-job-search](https://github.com/MadsLorentzen/ai-job-search) that runs my job hunt.
+On top of that I self-host two apps on my home server: [Burrow](https://github.com/Raiden0456/gonteractive), my Go tutor, and Scout, my fork of [ai-job-search](https://github.com/MadsLorentzen/ai-job-search) that runs my job hunt.
 
 Every morning I had to open the Claude app, the ChatGPT inbox, Gmail and two browser tabs to find out what had happened. I wanted one page that says "good morning, Raiden", shows what happened and what needs me right now, and lets me jump into the right app. That page is Pulse.
 
@@ -32,14 +32,14 @@ It is built for exactly my setup: the greeting has my name in it, and it knows t
 ## What it shows
 
 - **Today**: the greeting and four summary cards, each with one headline and one tiny chart:
-  - **Job search**: a funnel bar from drafts to offers and the shortlist size, headlined by whatever needs action first: applications quiet for 10+ days, then unsent drafts. Pulled live from ai-job-search.
-  - **Gonteractive**: whether today's daily Go quiz is done (with the score), in progress or still scheduled, my streak, and practice over the last week. Pulled live from Gonteractive.
+  - **Scout**: a funnel bar from drafts to offers and the shortlist size, headlined by whatever needs action first: applications quiet for 10+ days, then unsent drafts. Pulled live from Scout.
+  - **Burrow**: whether today's daily Go quiz is done (with the score), in progress or still scheduled, my streak, and practice over the last week. Pulled live from Burrow.
   - **Mail**: critical and warning emails per day over the last week.
   - **Invoices**: paid versus to-pay this month and the next due date.
 - **Needs attention**: critical and warning emails from the mail scan, overdue or unpaid invoices and invoice issues, plus any agent run that failed, all from the last three days. The most severe items come first, each with a link straight to the email.
 - **Agents**: the last run of every task. A task turns yellow when it has been quiet longer than its schedule allows (four days for the weekday briefs, so weekends do not count, and eight for the weekly review) and red when its last run failed.
 - **Activity**: a timeline of every report. Claude briefs show their headline and key points, with a link to the full HTML artifact.
-- **Apps**: Gonteractive and ai-job-search, health-checked from the server with their latency.
+- **Apps**: Burrow and Scout, health-checked from the server with their latency.
 - **Wallpaper**: I can put a photo behind everything, and the cards turn into frosted glass. A slider sets how much the photo is dimmed.
 - **Russian or English**: a toggle in the header. The language and the dimming are stored on the server, so my laptop and phone always match.
 
@@ -100,7 +100,7 @@ If there is nothing to report, still append the row with an empty list.
 
 ## Stack
 
-The same skeleton as Gonteractive, so both apps build and deploy the same way.
+The same skeleton as Burrow, so both apps build and deploy the same way.
 
 
 - **Backend**: Go, SQLite (`modernc.org/sqlite`, no CGO), `sqlc`, `goose` migrations, Google Sheets API.
@@ -141,9 +141,9 @@ Paste the contents of [`deploy/casaos/docker-compose.yml`](deploy/casaos/docker-
 | `APP_PASSWORD` | Your sign-in password. Pulse refuses to start without it. |
 | `TZ` | Your time zone, for example `Europe/Madrid`. |
 | `PULSE_SHEET_ID` | The spreadsheet ID from [Google setup](#google-setup). |
-| `PULSE_APPS` | The other apps by LAN address, for example `Gonteractive=http://192.168.1.10:8484;AI Job Search=http://192.168.1.10:3000`. |
-| `JOBSEARCH_URL`, `JOBSEARCH_PASSWORD` | ai-job-search's address and password, for the job search card. |
-| `GONTERACTIVE_URL`, `GONTERACTIVE_PASSWORD` | Gonteractive's address and password, for the streak and daily quiz card. |
+| `PULSE_APPS` | The other apps by LAN address, for example `Burrow=http://192.168.1.10:8484;Scout=http://192.168.1.10:8095`. |
+| `JOBSEARCH_URL`, `JOBSEARCH_PASSWORD` | Scout's address and password, for the Scout card. |
+| `GONTERACTIVE_URL`, `GONTERACTIVE_PASSWORD` | Burrow's address and password, for the streak and daily quiz card. |
 
 Leave `GOOGLE_APPLICATION_CREDENTIALS`, `PULSE_SHEET_TAB` and `PULSE_SHEET_POLL` as they are, then press **Install**. The app's data lives in `/DATA/AppData/pulse/data`.
 
@@ -172,10 +172,10 @@ If Tailscale runs as an app container instead of on the host, prefix it with `do
 | `PULSE_SHEET_TAB` | `events` | Tab that agents append rows to. |
 | `PULSE_SHEET_POLL` | `5m` | How often to pull rows. The minimum is `1m`. |
 | `PULSE_APPS` | (empty) | Apps to link and health-check: `Name=http://host:port;Other=http://host:port`. Use addresses the container can reach, such as the server's LAN IP; `*.ts.net` names may not resolve inside Docker. |
-| `JOBSEARCH_URL` | (empty) | Base URL of ai-job-search for the summary card, for example `http://192.168.1.10:8095`. The card asks to be connected when empty. |
-| `JOBSEARCH_PASSWORD` | (empty) | ai-job-search's `APP_PASSWORD`. Pulse signs in like a browser and reuses the session cookie, so the fork needs no changes. |
-| `GONTERACTIVE_URL` | (empty) | Base URL of Gonteractive for the streak and daily quiz card, for example `http://192.168.1.10:8484`. |
-| `GONTERACTIVE_PASSWORD` | (empty) | Gonteractive's `APP_PASSWORD`, used the same way as for ai-job-search. |
+| `JOBSEARCH_URL` | (empty) | Base URL of Scout (ai-job-search) for the summary card, for example `http://192.168.1.10:8095`. The card asks to be connected when empty. |
+| `JOBSEARCH_PASSWORD` | (empty) | Scout's `APP_PASSWORD`. Pulse signs in like a browser and reuses the session cookie, so the fork needs no changes. |
+| `GONTERACTIVE_URL` | (empty) | Base URL of Burrow (repo `gonteractive`) for the streak and daily quiz card, for example `http://192.168.1.10:8484`. |
+| `GONTERACTIVE_PASSWORD` | (empty) | Burrow's `APP_PASSWORD`, used the same way as for Scout. |
 | `APP_ADDR` | `:8080` | HTTP listen address. |
 | `APP_DATA_DIR` | `data` (`/data` in Docker) | Location of the SQLite database and the wallpaper. |
 | `APP_COOKIE_SECURE` | `auto` | `auto` marks the session cookie `Secure` only for HTTPS requests; `true`/`false` force it. |
@@ -212,8 +212,8 @@ internal/
   apps/               app links and health checks
   wallpaper/          background image upload and serving
   remote/             cookie-session client for my other apps
-  jobsearch/          ai-job-search summary
-  gonteractive/       Gonteractive streak and daily quiz summary
+  jobsearch/          Scout (ai-job-search) summary
+  gonteractive/       Burrow streak and daily quiz summary
   settings/           language and wallpaper dimming
   auth/ config/ httpx/ server/
   store/              SQLite, migrations, sqlc queries
@@ -221,3 +221,7 @@ web/                  React app (embedded into the binary)
   src/features/       today, summary, events, apps, wallpaper, settings, auth
 deploy/casaos/        CasaOS / ZimaOS compose
 ```
+
+## Credits
+
+The Go gopher in the Burrow app logo was designed by [Renée French](https://reneefrench.blogspot.com/) and is used under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). See [NOTICE](NOTICE).

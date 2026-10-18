@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useI18n } from "@/i18n"
 import { cn } from "@/lib/utils"
 import type { AppStatus } from "../types/app"
+import { appLogo } from "../utils/appLogo"
 
 export function AppsCard({ apps, ...props }: { apps: AppStatus[] } & ComponentProps<"div">) {
   const { t } = useI18n()
@@ -27,7 +28,11 @@ export function AppsCard({ apps, ...props }: { apps: AppStatus[] } & ComponentPr
                 rel="noreferrer"
                 className="group flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
               >
-                <AppWindowIcon className="size-5 text-hue-blue" />
+                {appLogo(app.name) ? (
+                  <img src={appLogo(app.name)} alt="" className="size-8 rounded-lg" />
+                ) : (
+                  <AppWindowIcon className="size-5 text-hue-blue" />
+                )}
                 <div className="flex min-w-0 flex-1 flex-col">
                   <span className="text-sm font-medium">{app.name}</span>
                   <span className="flex items-center gap-1.5 text-xs text-muted-foreground">

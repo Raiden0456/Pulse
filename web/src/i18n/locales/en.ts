@@ -24,9 +24,9 @@ export const en = {
   "today.subtitle": "Here is what happened while you were away.",
 
   "summary.week": "7 days",
-  "summary.jobs.title": "Job search",
+  "summary.jobs.title": "Scout",
   "summary.jobs.notConfigured": "Connect it with JOBSEARCH_URL",
-  "summary.jobs.unavailable": "ai-job-search is unreachable",
+  "summary.jobs.unavailable": "Scout is unreachable",
   "summary.jobs.stale": { one: "{count} application quiet 10+ days", other: "{count} applications quiet 10+ days" },
   "summary.jobs.drafted": { one: "{count} draft not sent", other: "{count} drafts not sent" },
   "summary.jobs.interview": "{count} in interviews",
@@ -39,9 +39,9 @@ export const en = {
   "summary.jobs.stage.offer": "offers",
   "summary.jobs.stage.closed": "closed",
 
-  "summary.go.title": "Gonteractive",
+  "summary.go.title": "Burrow",
   "summary.go.notConfigured": "Connect it with GONTERACTIVE_URL",
-  "summary.go.unavailable": "Gonteractive is unreachable",
+  "summary.go.unavailable": "Burrow is unreachable",
   "summary.go.streak": { one: "{count} day", other: "{count} days" },
   "summary.go.done": "Daily quiz done",
   "summary.go.doneScore": "Daily quiz done · {score}%",

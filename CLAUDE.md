@@ -1,6 +1,6 @@
 # Pulse
 
-Self-hosted, single-user home dashboard: what my AI agents did, what needs attention, links to my other apps (gonteractive, ai-job-search). Read-only by design — it never runs or controls agents.
+Self-hosted, single-user home dashboard: what my AI agents did, what needs attention, links to my other apps (Burrow, Scout — my ai-job-search fork). Read-only by design — it never runs or controls agents.
 
 ## Data flow
 
@@ -9,8 +9,8 @@ Self-hosted, single-user home dashboard: what my AI agents did, what needs atten
 - Known tasks: ChatGPT `mail-scan` (`{scanned, items[]}`), `invoices` (`{invoices[], totals, issues[]}`); Claude `morning-brief`, `pre-standup-brief`, `weekly-review` (`{artifact_url, headline, highlights[]}` — the HTML stays a claude.ai artifact, Pulse only links it). Per-task staleness thresholds live in `utils/stale.ts`. Shapes live in `web/src/features/events/types/event.ts`; attention items are derived client-side in `utils/attention.ts`.
 - Wallpaper: single image in `$APP_DATA_DIR/wallpaper`, served at `/api/wallpaper/image?v=<mtime>` (immutable cache). When set, the root gets `data-wallpaper` and cards turn into blurred glass (`index.css`, kept outside `@layer` so it beats `bg-card`).
 - First render staggers in via `.enter` + `enter(i)` from `lib/enter.ts`; pass it straight to the Card, not a wrapper — opacity on a wrapper breaks the card's backdrop blur mid-animation.
-- Summary cards (`web/src/features/summary`): job search (`internal/jobsearch`) and Gonteractive (`internal/gonteractive`: `/api/progress`, `/api/daily`, `/api/quizzes`) both go through `internal/remote`, which signs in with the app's password (cookie jar, re-login on 401); Pulse returns only aggregated numbers; mail is bucketed client-side from `/api/events?task=mail-scan&since=…`; invoices read `totals` (month-to-date) from the latest `invoices` event.
-- Apps from `PULSE_APPS` (`Name=url;Name=url`) are probed server-side for the up/down badge.
+- Summary cards (`web/src/features/summary`): Scout (`internal/jobsearch`) and Burrow (`internal/gonteractive`, the repo is still called gonteractive: `/api/progress`, `/api/daily`, `/api/quizzes`) both go through `internal/remote`, which signs in with the app's password (cookie jar, re-login on 401); Pulse returns only aggregated numbers; mail is bucketed client-side from `/api/events?task=mail-scan&since=…`; invoices read `totals` (month-to-date) from the latest `invoices` event.
+- Apps from `PULSE_APPS` (`Name=url;Name=url`) are probed server-side for the up/down badge. Logos of my own apps are bundled in `web/public/apps/` and matched by name in `features/apps/utils/appLogo.ts` (bundled, not fetched from the apps, so they show up away from home too); unknown apps get a generic icon.
 
 ## Stack
 

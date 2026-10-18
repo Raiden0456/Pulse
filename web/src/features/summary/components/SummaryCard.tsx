@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 type Props = ComponentProps<"div"> & {
   icon: LucideIcon
   tone: Tone
+  logo?: string
   title: string
   aside?: ReactNode
   headline: ReactNode
@@ -18,11 +19,11 @@ type Props = ComponentProps<"div"> & {
   href?: string
 }
 
-export function SummaryCard({ icon, tone, title, aside, headline, headlineTone, visual, footer, href, className, ...props }: Props) {
+export function SummaryCard({ icon, tone, logo, title, aside, headline, headlineTone, visual, footer, href, className, ...props }: Props) {
   return (
     <Card className={cn("relative flex flex-col gap-3 p-4", className)} {...props}>
       <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-        <IconChip icon={icon} tone={tone} className="size-7" />
+        {logo ? <img src={logo} alt="" className="size-7 rounded-lg" /> : <IconChip icon={icon} tone={tone} className="size-7" />}
         <span className="text-sm font-medium text-foreground">{title}</span>
         <span className="ml-auto">{aside}</span>
         {href && (
