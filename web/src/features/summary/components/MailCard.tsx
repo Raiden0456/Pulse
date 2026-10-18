@@ -43,7 +43,7 @@ export function MailCard(props: ComponentProps<"div">) {
                 ) : (
                   <div className="flex w-3 flex-col overflow-hidden rounded-sm" style={{ height: `${Math.max(15, (total / peak) * 100)}%` }}>
                     <div className="bg-destructive" style={{ flexGrow: d.critical }} />
-                    <div className="bg-warning" style={{ flexGrow: d.warning }} />
+                    <div className="bg-warning-solid" style={{ flexGrow: d.warning }} />
                   </div>
                 )}
                 <span className={cn("mt-1 text-center text-[10px] leading-none text-muted-foreground", d === today && "font-semibold text-foreground")}>

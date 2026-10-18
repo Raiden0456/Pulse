@@ -31,7 +31,7 @@ export function AppsCard({ apps, ...props }: { apps: AppStatus[] } & ComponentPr
                 <div className="flex min-w-0 flex-1 flex-col">
                   <span className="text-sm font-medium">{app.name}</span>
                   <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <span className={cn("size-2 rounded-full", app.up ? "bg-success" : "bg-destructive")} />
+                    <span className={cn("size-2 rounded-full", app.up ? "bg-success-solid" : "bg-destructive")} />
                     {app.up ? t("apps.online", { ms: app.latency_ms }) : t("apps.down")}
                   </span>
                 </div>

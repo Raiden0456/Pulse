@@ -30,7 +30,7 @@ export function TasksCard({ latest, ...props }: { latest: PulseEvent[] } & Compo
               const failed = e.status === "error"
               return (
                 <li key={`${e.source}-${e.task}`} className="flex items-center gap-3">
-                  <span className={cn("size-2.5 shrink-0 rounded-full", failed ? "bg-destructive" : stale ? "bg-warning" : "bg-success")} />
+                  <span className={cn("size-2.5 shrink-0 rounded-full", failed ? "bg-destructive" : stale ? "bg-warning-solid" : "bg-success-solid")} />
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="text-sm font-medium">{taskLabel(e.task)}</span>
                     <span className="text-xs text-muted-foreground">{sourceLabel(e.source)}</span>

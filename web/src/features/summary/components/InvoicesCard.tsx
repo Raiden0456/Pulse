@@ -47,8 +47,8 @@ export function InvoicesCard({ latest, ...props }: { latest: PulseEvent | undefi
         <div className="flex flex-col gap-1.5">
           <StackedBar
             segments={[
-              { key: "paid", value: paid, className: "bg-success", label: t("summary.invoices.paid") },
-              { key: "unpaid", value: unpaid, className: "bg-warning", label: t("summary.invoices.unpaid") },
+              { key: "paid", value: paid, className: "bg-success-solid", label: t("summary.invoices.paid") },
+              { key: "unpaid", value: unpaid, className: "bg-warning-solid", label: t("summary.invoices.unpaid") },
               { key: "overdue", value: overdue, className: "bg-destructive", label: t("summary.invoices.overdueLabel") },
             ]}
           />
