@@ -12,6 +12,7 @@ import (
 	_ "time/tzdata"
 
 	"github.com/raiden0456/pulse/internal/apps"
+	"github.com/raiden0456/pulse/internal/attention"
 	"github.com/raiden0456/pulse/internal/auth"
 	"github.com/raiden0456/pulse/internal/config"
 	"github.com/raiden0456/pulse/internal/events"
@@ -69,6 +70,7 @@ func run() error {
 		settings.New(q),
 		jobsearch.New(cfg.JobSearchURL, cfg.JobSearchPass),
 		gonteractive.New(cfg.GonteractURL, cfg.GonteractPass),
+		attention.New(q),
 	)
 
 	srv := &http.Server{Addr: cfg.Addr, Handler: handler, ReadHeaderTimeout: 10 * time.Second}

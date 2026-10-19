@@ -45,16 +45,16 @@ function fromEvent(e: PulseEvent): AttentionItem[] {
 
   const inv = invoicesPayload(e)
   if (inv) {
-    const unpaid = inv.invoices
-      .filter((i) => i.state === "overdue" || i.state === "unpaid")
+    const failed = inv.invoices
+      .filter((i) => i.status === "failed")
       .map((i, n): AttentionItem => ({
         ...base,
         key: `${e.id}-inv-${n}`,
-        severity: i.state === "overdue" ? "critical" : "warning",
+        severity: "critical",
         title: `${i.counterparty}: ${i.amount} ${i.currency}`,
-        detail: t(i.state === "overdue" ? "attention.overdue" : "attention.unpaid"),
+        detail: t("attention.chargeFailed"),
         action: i.note,
-        deadline: i.due_at,
+        deadline: null,
         link: null,
       }))
     const issues = inv.issues.map((issue, n): AttentionItem => ({
@@ -67,7 +67,7 @@ function fromEvent(e: PulseEvent): AttentionItem[] {
       deadline: null,
       link: null,
     }))
-    return [...unpaid, ...issues]
+    return [...failed, ...issues]
   }
   return []
 }

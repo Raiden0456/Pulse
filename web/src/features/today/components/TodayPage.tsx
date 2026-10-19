@@ -5,7 +5,7 @@ import { PageLoader } from "@/components/PageLoader"
 import { Button } from "@/components/ui/button"
 import { AppsCard, appsApi } from "@/features/apps"
 import { authApi } from "@/features/auth"
-import { ActivityCard, AttentionCard, TasksCard, attentionItems, eventsApi } from "@/features/events"
+import { ActivityCard, AttentionCard, BriefCard, TasksCard, attentionItems, currentBrief, eventsApi } from "@/features/events"
 import { LanguageToggle, useInterface, useInterfaceSync } from "@/features/settings"
 import { GonteractiveCard, InvoicesCard, JobSearchCard, MailCard } from "@/features/summary"
 import { AppearanceMenu, WallpaperBackdrop, useWallpaper } from "@/features/wallpaper"
@@ -29,6 +29,7 @@ export function TodayPage() {
 
   const now = new Date()
   const attention = attentionItems(events.data ?? [])
+  const brief = currentBrief(latest.data ?? [])
 
   return (
     <>
@@ -57,6 +58,8 @@ export function TodayPage() {
         </section>
 
         {(events.error || latest.error) && <ErrorAlert error={events.error ?? latest.error} />}
+
+        {brief && <BriefCard {...enter(2)} current={brief} />}
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <JobSearchCard {...enter(2)} />

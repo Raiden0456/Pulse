@@ -15,6 +15,11 @@ type Event struct {
 	CreatedAt int64
 }
 
+type ResolvedItem struct {
+	Key        string
+	ResolvedAt int64
+}
+
 type Session struct {
 	TokenHash string
 	ExpiresAt int64

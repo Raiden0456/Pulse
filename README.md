@@ -35,9 +35,10 @@ It is built for exactly my setup: the greeting has my name in it, and it knows t
   - **Scout**: a funnel bar from drafts to offers and the shortlist size, headlined by whatever needs action first: applications quiet for 10+ days, then unsent drafts. Pulled live from Scout.
   - **Burrow**: whether today's daily Go quiz is done (with the score), in progress or still scheduled, my streak, and practice over the last week. Pulled live from Burrow.
   - **Mail**: critical and warning emails per day over the last week.
-  - **Invoices**: paid versus to-pay this month and the next due date.
-- **Needs attention**: critical and warning emails from the mail scan, overdue or unpaid invoices and invoice issues, plus any agent run that failed, all from the last three days. The most severe items come first, each with a link straight to the email.
+  - **Invoices**: what got billed this month, split by provider, compared with last month, plus the next direct debit. Everything is charged automatically, so the card only shouts when a charge fails or a bill looks off.
+- **Needs attention**: critical and warning emails from the mail scan, overdue or unpaid invoices and invoice issues, plus any agent run that failed, all from the last three days. The most severe items come first, each with a link straight to the email. Anything I've already dealt with I mark as resolved (one by one or all at once): it moves to a collapsed "Resolved" list where I can bring it back, and like everything else it drops off after three days.
 - **Agents**: the last run of every task. A task turns yellow when it has been quiet longer than its schedule allows (four days for the weekday briefs, so weekends do not count, and eight for the weekly review) and red when its last run failed.
+- **Today's brief**: right under the greeting, the latest brief that ran today (morning brief in the morning, the pre-standup one before standup, the weekly review on Friday) with its key points and an "Open brief" button. Every brief in the Agents list is clickable too.
 - **Activity**: a timeline of every report. Claude briefs show their headline and key points, with a link to the full HTML artifact.
 - **Apps**: Burrow and Scout, health-checked from the server with their latency.
 - **Wallpaper**: I can put a photo behind everything, and the cards turn into frosted glass. A slider sets how much the photo is dimmed.
@@ -80,7 +81,7 @@ The payload shapes Pulse understands:
 | Task | Payload |
 | --- | --- |
 | `mail-scan` | `{"scanned": 5, "items": [{"severity": "critical\|warning", "from", "subject", "received_at", "reason", "action", "deadline", "link"}]}` |
-| `invoices` | `{"invoices": [{"counterparty", "number", "amount", "currency", "issued_at", "due_at", "state": "new\|paid\|unpaid\|overdue", "note"}], "totals": {"EUR": {"paid", "unpaid", "overdue"}}, "issues": []}`, where `totals` covers the whole current month, not only new invoices |
+| `invoices` | `{"month": "2026-10", "currency": "EUR", "total", "previous_total", "by_counterparty": [{"name", "amount"}], "next_charge": {"counterparty", "amount", "currency", "charge_at"}, "invoices": [{"counterparty", "amount", "currency", "issued_at", "charge_at", "status": "charged\|scheduled\|failed", "note"}], "issues": []}`. My bills are all direct debits, so there is no "paid" state: `total` covers the whole month, `invoices` only new or changed ones, and only failed charges and `issues` reach "Needs attention" |
 | `morning-brief`, `pre-standup-brief`, `weekly-review` | `{"artifact_url", "headline", "highlights": []}` |
 
 Unknown tasks still appear in Activity and Agents with their summary. Payloads come from LLMs, so Pulse strips markdown code fences and treats invalid JSON as empty instead of failing.

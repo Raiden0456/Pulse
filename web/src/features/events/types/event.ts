@@ -26,22 +26,33 @@ export type MailScanPayload = {
   items: MailItem[]
 }
 
-export type InvoiceState = "new" | "paid" | "unpaid" | "overdue"
+export type ChargeStatus = "charged" | "scheduled" | "failed"
 
 export type Invoice = {
   counterparty: string
-  number: string | null
   amount: number
   currency: string
   issued_at: string | null
-  due_at: string | null
-  state: InvoiceState
+  charge_at: string | null
+  status: ChargeStatus
   note: string | null
 }
 
+export type NextCharge = {
+  counterparty: string
+  amount: number
+  currency: string
+  charge_at: string
+}
+
 export type InvoicesPayload = {
+  month: string | null
+  currency: string
+  total: number | null
+  previous_total: number | null
+  by_counterparty: { name: string; amount: number }[]
+  next_charge: NextCharge | null
   invoices: Invoice[]
-  totals: Record<string, { paid: number; unpaid: number; overdue: number }>
   issues: string[]
 }
 
