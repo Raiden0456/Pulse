@@ -53,7 +53,7 @@ func (s *Service) Routes(mux *http.ServeMux) {
 func (s *Service) Ingest(ctx context.Context, in Input) (bool, error) {
 	n, err := s.q.InsertEvent(ctx, db.InsertEventParams{
 		Source:  in.Source,
-		Task:    in.Task,
+		Task:    CanonicalTask(in.Task),
 		Status:  in.Status,
 		Summary: in.Summary,
 		Payload: NormalizePayload(in.Payload),
