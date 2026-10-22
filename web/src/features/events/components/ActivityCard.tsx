@@ -12,7 +12,7 @@ import { sourceLabel, taskLabel } from "../utils/labels"
 import { briefPayload } from "../utils/payload"
 import { relativeTime } from "../utils/time"
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 5
 
 export function ActivityCard(props: ComponentProps<"div">) {
   const { t } = useI18n()
