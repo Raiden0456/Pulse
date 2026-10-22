@@ -53,7 +53,7 @@ export function TodayPage() {
           <span className="text-xs uppercase tracking-wider text-muted-foreground">
             {now.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}
           </span>
-          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{t(greetingKey(now.getHours()))}, Raiden</h1>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{t(greetingKey(now.getHours()))}, Vrezh</h1>
           <p className="text-sm text-muted-foreground">{t("today.subtitle")}</p>
         </section>
 
@@ -61,19 +61,19 @@ export function TodayPage() {
 
         {brief && <BriefCard {...enter(2)} current={brief} />}
 
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <JobSearchCard {...enter(2)} />
           <GonteractiveCard {...enter(3)} />
           <MailCard {...enter(4)} />
           <InvoicesCard {...enter(5)} latest={latest.data?.find((e) => e.task === "invoices")} />
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="flex flex-col gap-6 lg:col-span-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="flex min-w-0 flex-col gap-6 lg:col-span-2">
             <AttentionCard {...enter(6)} items={attention} />
-            <ActivityCard {...enter(8)} events={events.data ?? []} />
+            <ActivityCard {...enter(8)} />
           </div>
-          <div className="flex flex-col gap-6">
+          <div className="flex min-w-0 flex-col gap-6">
             <AppsCard {...enter(7)} apps={apps.data ?? []} />
             <TasksCard {...enter(9)} latest={latest.data ?? []} />
           </div>

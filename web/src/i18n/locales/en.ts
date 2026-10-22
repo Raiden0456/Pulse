@@ -88,6 +88,7 @@ export const en = {
   "activity.title": "Activity",
   "activity.empty": "Agent reports will show up here.",
   "activity.error": "error",
+  "activity.loadMore": "Show more",
   "activity.openBrief": "Open brief",
 
   "apps.title": "Apps",

@@ -89,12 +89,32 @@ func (s *Service) list(w http.ResponseWriter, r *http.Request) error {
 		}
 		limit = min(n, maxLimit)
 	}
-	rows, err := s.q.ListEvents(r.Context(), int64(limit))
+	var rows []db.Event
+	var err error
+	if before := r.URL.Query().Get("before"); before != "" {
+		runAt, id, ok := parseCursor(before)
+		if !ok {
+			return httpx.Errorf(http.StatusBadRequest, "before must be <run_at>:<id>")
+		}
+		rows, err = s.q.ListEventsBefore(r.Context(), db.ListEventsBeforeParams{BeforeRunAt: runAt, BeforeID: id, RowLimit: int64(limit)})
+	} else {
+		rows, err = s.q.ListEvents(r.Context(), int64(limit))
+	}
 	if err != nil {
 		return err
 	}
 	httpx.JSON(w, http.StatusOK, toEvents(rows))
 	return nil
+}
+
+func parseCursor(v string) (int64, int64, bool) {
+	a, b, ok := strings.Cut(v, ":")
+	if !ok {
+		return 0, 0, false
+	}
+	runAt, err1 := strconv.ParseInt(a, 10, 64)
+	id, err2 := strconv.ParseInt(b, 10, 64)
+	return runAt, id, err1 == nil && err2 == nil
 }
 
 func (s *Service) listTask(w http.ResponseWriter, r *http.Request, task string) error {

@@ -25,7 +25,7 @@ I run a bunch of AI automations, and they were scattered across too many places.
 
 On top of that I self-host two apps on my home server: [Burrow](https://github.com/Raiden0456/gonteractive), my Go tutor, and Scout, my fork of [ai-job-search](https://github.com/MadsLorentzen/ai-job-search) that runs my job hunt.
 
-Every morning I had to open the Claude app, the ChatGPT inbox, Gmail and two browser tabs to find out what had happened. I wanted one page that says "good morning, Raiden", shows what happened and what needs me right now, and lets me jump into the right app. That page is Pulse.
+Every morning I had to open the Claude app, the ChatGPT inbox, Gmail and two browser tabs to find out what had happened. I wanted one page that says "good morning, Vrezh", shows what happened and what needs me right now, and lets me jump into the right app. That page is Pulse.
 
 It is built for exactly my setup: the greeting has my name in it, and it knows the payloads of my own tasks. I am not trying to make it a product. If you want something similar, fork it and bend it to your own agents.
 
@@ -39,7 +39,7 @@ It is built for exactly my setup: the greeting has my name in it, and it knows t
 - **Needs attention**: critical and warning emails from the mail scan, overdue or unpaid invoices and invoice issues, plus any agent run that failed, all from the last three days. The most severe items come first, each with a link straight to the email. Anything I've already dealt with I mark as resolved (one by one or all at once): it moves to a collapsed "Resolved" list where I can bring it back, and like everything else it drops off after three days.
 - **Agents**: the last run of every task. A task turns yellow when it has been quiet longer than its schedule allows (four days for the weekday briefs, so weekends do not count, and eight for the weekly review) and red when its last run failed.
 - **Today's brief**: right under the greeting, the latest brief that ran today (morning brief in the morning, the pre-standup one before standup, the weekly review on Friday) with its key points and an "Open brief" button. Every brief in the Agents list is clickable too.
-- **Activity**: a timeline of every report. Claude briefs show their headline and key points, with a link to the full HTML artifact.
+- **Activity**: a timeline of every report, the latest 10 first with "Show more" for older ones. Claude briefs show their headline and key points, with a link to the full HTML artifact.
 - **Apps**: Burrow and Scout, health-checked from the server with their latency.
 - **Wallpaper**: I can put a photo behind everything, and the cards turn into frosted glass. A slider sets how much the photo is dimmed.
 - **Russian or English**: a toggle in the header. The language and the dimming are stored on the server, so my laptop and phone always match.

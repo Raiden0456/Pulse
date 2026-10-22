@@ -33,7 +33,7 @@ export function BriefCard({ current, ...props }: { current: CurrentBrief } & Com
           </CardAction>
         )}
       </CardHeader>
-      <CardContent className="flex flex-col gap-2">
+      <CardContent className="flex min-w-0 flex-col gap-2 wrap-anywhere">
         {brief.headline && <p className="text-base font-semibold leading-snug">{brief.headline}</p>}
         {brief.highlights.length > 0 ? (
           <ul className="grid list-disc gap-x-8 gap-y-1 pl-4 text-sm md:grid-cols-2">

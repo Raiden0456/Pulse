@@ -4,6 +4,7 @@ import type { ResolvedItem } from "./types/resolved"
 
 export const eventsApi = {
   list: (limit = 100) => api.get<PulseEvent[]>(`/api/events?limit=${limit}`),
+  page: (limit: number, before?: string) => api.get<PulseEvent[]>(`/api/events?limit=${limit}${before ? `&before=${before}` : ""}`),
   latest: () => api.get<PulseEvent[]>("/api/events/latest"),
   resolved: () => api.get<ResolvedItem[]>("/api/attention/resolved"),
   resolve: (key: string) => api.put<void>(`/api/attention/resolved/${encodeURIComponent(key)}`, {}),

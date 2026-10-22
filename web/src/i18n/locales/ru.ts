@@ -107,6 +107,7 @@ export const ru: Messages = {
   "activity.title": "Активность",
   "activity.empty": "Тут появятся отчёты агентов.",
   "activity.error": "ошибка",
+  "activity.loadMore": "Показать ещё",
   "activity.openBrief": "Открыть брифинг",
 
   "apps.title": "Приложения",

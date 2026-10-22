@@ -79,7 +79,7 @@ function AttentionRow({ item, resolved = false, onToggle }: { item: AttentionIte
   return (
     <li className="group flex gap-3 py-3 first:pt-0 last:pb-0">
       <Icon className={cn("mt-0.5 size-5 shrink-0", resolved ? "text-muted-foreground" : critical ? "text-destructive" : "text-warning")} />
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <div className="flex min-w-0 flex-1 flex-col gap-1 wrap-anywhere">
         <div className="flex items-start justify-between gap-2">
           <span className={cn("font-medium leading-snug", resolved && "line-through decoration-muted-foreground/50")}>{item.title}</span>
           <div className="-mt-1 -mr-2 flex shrink-0 items-center">

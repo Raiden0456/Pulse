@@ -1,23 +1,40 @@
 import type { ComponentProps } from "react"
+import { useInfiniteQuery } from "@tanstack/react-query"
 import { ActivityIcon, ArrowUpRightIcon } from "lucide-react"
 import { IconChip } from "@/components/IconChip"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useI18n } from "@/i18n"
+import { eventsApi } from "../api"
 import type { PulseEvent } from "../types/event"
 import { sourceLabel, taskLabel } from "../utils/labels"
 import { briefPayload } from "../utils/payload"
 import { relativeTime } from "../utils/time"
 
-export function ActivityCard({ events, ...props }: { events: PulseEvent[] } & ComponentProps<"div">) {
+const PAGE_SIZE = 10
+
+export function ActivityCard(props: ComponentProps<"div">) {
   const { t } = useI18n()
+  const activity = useInfiniteQuery({
+    queryKey: ["events", "activity"],
+    queryFn: ({ pageParam }) => eventsApi.page(PAGE_SIZE, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => {
+      const tail = last.at(-1)
+      return last.length === PAGE_SIZE && tail ? `${tail.run_at}:${tail.id}` : undefined
+    },
+    refetchInterval: 60_000,
+  })
+  const events = activity.data?.pages.flat() ?? []
+
   return (
     <Card {...props}>
       <CardHeader className="flex flex-row items-center gap-3">
         <IconChip icon={ActivityIcon} tone="purple" />
         <CardTitle>{t("activity.title")}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-4">
         {events.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("activity.empty")}</p>
         ) : (
@@ -26,6 +43,11 @@ export function ActivityCard({ events, ...props }: { events: PulseEvent[] } & Co
               <ActivityItem key={e.id} event={e} />
             ))}
           </ol>
+        )}
+        {activity.hasNextPage && (
+          <Button variant="outline" size="sm" className="self-center" disabled={activity.isFetchingNextPage} onClick={() => activity.fetchNextPage()}>
+            {t("activity.loadMore")}
+          </Button>
         )}
       </CardContent>
     </Card>
@@ -36,7 +58,7 @@ function ActivityItem({ event: e }: { event: PulseEvent }) {
   const { t } = useI18n()
   const brief = briefPayload(e)
   return (
-    <li className="relative">
+    <li className="relative min-w-0 wrap-anywhere">
       <span className="absolute -left-[25px] top-1.5 size-2.5 rounded-full border-2 border-background bg-primary" />
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-medium">{taskLabel(e.task)}</span>

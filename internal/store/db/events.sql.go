@@ -78,11 +78,56 @@ func (q *Queries) LatestEventPerTask(ctx context.Context) ([]Event, error) {
 }
 
 const listEvents = `-- name: ListEvents :many
-SELECT id, source, task, status, summary, payload, run_at, created_at FROM events ORDER BY run_at DESC LIMIT ?
+SELECT id, source, task, status, summary, payload, run_at, created_at FROM events ORDER BY run_at DESC, id DESC LIMIT ?
 `
 
 func (q *Queries) ListEvents(ctx context.Context, limit int64) ([]Event, error) {
 	rows, err := q.db.QueryContext(ctx, listEvents, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Event
+	for rows.Next() {
+		var i Event
+		if err := rows.Scan(
+			&i.ID,
+			&i.Source,
+			&i.Task,
+			&i.Status,
+			&i.Summary,
+			&i.Payload,
+			&i.RunAt,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listEventsBefore = `-- name: ListEventsBefore :many
+SELECT id, source, task, status, summary, payload, run_at, created_at FROM events
+WHERE run_at < ?1 OR (run_at = ?1 AND id < ?2)
+ORDER BY run_at DESC, id DESC
+LIMIT ?3
+`
+
+type ListEventsBeforeParams struct {
+	BeforeRunAt int64
+	BeforeID    int64
+	RowLimit    int64
+}
+
+func (q *Queries) ListEventsBefore(ctx context.Context, arg ListEventsBeforeParams) ([]Event, error) {
+	rows, err := q.db.QueryContext(ctx, listEventsBefore, arg.BeforeRunAt, arg.BeforeID, arg.RowLimit)
 	if err != nil {
 		return nil, err
 	}

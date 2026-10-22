@@ -4,7 +4,13 @@ VALUES (?, ?, ?, ?, ?, ?)
 ON CONFLICT (source, task, run_at) DO NOTHING;
 
 -- name: ListEvents :many
-SELECT * FROM events ORDER BY run_at DESC LIMIT ?;
+SELECT * FROM events ORDER BY run_at DESC, id DESC LIMIT ?;
+
+-- name: ListEventsBefore :many
+SELECT * FROM events
+WHERE run_at < sqlc.arg(before_run_at) OR (run_at = sqlc.arg(before_run_at) AND id < sqlc.arg(before_id))
+ORDER BY run_at DESC, id DESC
+LIMIT sqlc.arg(row_limit);
 
 -- name: LatestEventPerTask :many
 SELECT e.* FROM events e
