@@ -9,6 +9,7 @@ import { SummaryCard } from "./SummaryCard"
 
 const shades = ["bg-primary", "bg-primary/70", "bg-primary/50", "bg-primary/35", "bg-primary/20"]
 const SPIKE_PERCENT = 20
+const LEGEND_ROWS = 3
 
 export function InvoicesCard({ latest, ...props }: { latest: PulseEvent | undefined } & ComponentProps<"div">) {
   const { t, locale } = useI18n()
@@ -38,6 +39,8 @@ export function InvoicesCard({ latest, ...props }: { latest: PulseEvent | undefi
   const parts = [...data.by_counterparty].sort((a, b) => b.amount - a.amount)
   const top = parts.slice(0, shades.length - 1)
   const rest = parts.slice(shades.length - 1).reduce((sum, p) => sum + p.amount, 0)
+  const legend = parts.slice(0, LEGEND_ROWS)
+  const legendRest = parts.slice(LEGEND_ROWS).reduce((sum, p) => sum + p.amount, 0)
   const segments = [
     ...top.map((p, i) => ({ key: p.name, value: p.amount, className: shades[i], label: p.name })),
     ...(rest > 0 ? [{ key: "rest", value: rest, className: shades[shades.length - 1], label: t("summary.invoices.other") }] : []),
@@ -46,19 +49,26 @@ export function InvoicesCard({ latest, ...props }: { latest: PulseEvent | undefi
   return (
     <SummaryCard
       {...base}
-      headline={failed > 0 ? t("summary.invoices.failed", { count: failed }) : t("summary.invoices.total", { amount: money(data.total) })}
+      headline={
+        <>
+          {failed > 0 ? t("summary.invoices.failed", { count: failed }) : t("summary.invoices.total", { amount: money(data.total) })}
+          {delta !== null && (
+            <span className={cn("mt-1 block text-xs font-normal", delta >= SPIKE_PERCENT ? "text-warning" : "text-muted-foreground")}>
+              {t("summary.invoices.delta", { delta: `${delta > 0 ? "+" : ""}${delta}%` })}
+            </span>
+          )}
+        </>
+      }
       headlineTone={failed > 0 ? "text-destructive" : ""}
       visual={
         <div className="flex flex-col gap-1.5">
           <StackedBar segments={segments} />
-          <p className="flex flex-wrap gap-x-2 text-xs text-muted-foreground tabular-nums">
-            <span className="truncate">{top.slice(0, 3).map((p) => `${p.name} ${money(p.amount)}`).join(" · ")}</span>
-            {delta !== null && (
-              <span className={cn("ml-auto whitespace-nowrap", delta >= SPIKE_PERCENT && "text-warning")}>
-                {t("summary.invoices.delta", { delta: `${delta > 0 ? "+" : ""}${delta}%` })}
-              </span>
-            )}
-          </p>
+          <ul className="flex flex-col gap-1 text-xs">
+            {legend.map((p, i) => (
+              <LegendRow key={p.name} swatch={shades[i]} name={p.name} amount={money(p.amount)} />
+            ))}
+            {legendRest > 0 && <LegendRow swatch={shades[LEGEND_ROWS]} name={t("summary.invoices.other")} amount={money(legendRest)} />}
+          </ul>
         </div>
       }
       footer={
@@ -71,5 +81,15 @@ export function InvoicesCard({ latest, ...props }: { latest: PulseEvent | undefi
           : t("summary.invoices.lastReport", { when: relativeTime(latest!.run_at) })
       }
     />
+  )
+}
+
+function LegendRow({ swatch, name, amount }: { swatch: string; name: string; amount: string }) {
+  return (
+    <li className="flex items-center gap-2">
+      <span className={cn("size-2 shrink-0 rounded-full", swatch)} />
+      <span className="min-w-0 flex-1 truncate text-muted-foreground">{name}</span>
+      <span className="shrink-0 tabular-nums">{amount}</span>
+    </li>
   )
 }
